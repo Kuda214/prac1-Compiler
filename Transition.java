@@ -43,8 +43,9 @@ public class Transition {
     //toString
     @Override
     public String toString() {
-        return "Transition [transitionValue=" + transitionValue + ", transitionTo=" + transitionTo.getNodeLabel() + ", transitionFrom="
-                + transitionFrom.getNodeLabel() + "]";
+        // return "Transition:" + transitionValue + ", transitionTo=" + transitionTo.getStateLabel() + ", transitionFrom="
+        //         + transitionFrom.getStateLabel() + "]";
+        return "State Transition: " + transitionFrom.getStateLabel() + " -" + transitionValue + " -> " + transitionTo.getStateLabel() ;
     }
    
 }

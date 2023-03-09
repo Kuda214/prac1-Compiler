@@ -69,17 +69,22 @@ public class M {
 
     public static void collectSubstrings(String stringToTest, boolean isStart )
     {
+        System.out.println("stringToTest: " + stringToTest + " " + stringToTest.length() );
+        System.out.println("Stack: " + stack + " size:" + stack.size());
+        
         
         for(int i =0; i < stringToTest.length(); i++) {
             
-           
+           System.out.println("Char in question: " + stringToTest.charAt(i) + "\n");
             if(stringToTest.charAt(i) == '(' || stringToTest.charAt(i) == ')') {
                 stack.add(stringToTest.charAt(i));
+                System.out.println("stringToTest: " + stringToTest + " " + stringToTest.length());
+                System.out.println("Stack: " + stack );
                 
                 if(stringToTest.charAt(i) == '(')
                 {
                     //find nearest )
-                  
+            
                 }
                 else if(stringToTest.charAt(i) == ')' )
                 {
@@ -91,11 +96,9 @@ public class M {
                 }
             }
             else if((Character.isLowerCase(stringToTest.charAt(i))) || (Character.isDigit(stringToTest.charAt(i)))  ) {
-                    //alphabet or digit
+                if(stack.size() > 0){
+                    System.out.println(stringToTest.charAt(i) + " is a character");
 
-                    // stack.add(stringToTest.charAt(i));
-
-                    //concatenate
                     if(stack.get(stack.size()-1) instanceof Character)
                     {
                         //concatenate
@@ -105,9 +108,13 @@ public class M {
                         State toState = new State("q"+ numOfState, "normal");
                         numOfState++;
 
-                        tempNfa.alphanumericNFA(fromState, toState, stringToTest.charAt(i)+ "");
+                      
+                        tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+                    
 
                         stack.add(tempNfa);
+                        // System.out.mprimmntln("Stack:mm " + stackn + " size:" + stack.size());
+
                     }
                     else if(stack.get(stack.size()-1) instanceof NFA)
                     {
@@ -115,24 +122,55 @@ public class M {
                         NFA prevNFA = (NFA) stack.get(stack.size()-1);
                         NFA tempNfa = new NFA();
                         State fromState = prevNFA.getExitingState() ;
+                        // State fromState = new State("q"+numOfState, "normal");
+
                         State toState = new State("q"+ numOfState, "normal");
                         numOfState++;
 
-                        tempNfa.alphanumericNFA(fromState, toState, stringToTest.charAt(i)+ "");
-                        stack.remove(stack.size()-1);
+                        tempNfa = tempNfa.alphanumericNFA(prevNFA , fromState, toState, stringToTest.charAt(i)+ "");
+                        // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
+                        stack.remove(stack.size()-1);//remove previous item in stack 
+
+                       
+
                         stack.add(tempNfa);
+
                     }
+                }
+
             }
             if(stringToTest.charAt(i) == '|')
             {
                 stack.add(stringToTest.charAt(i));
 
-            }              
+            }  
+            if(stringToTest.charAt(i) == '*')
+            {
+                stack.add(stringToTest.charAt(i));
+            }
+            System.out.println("Stack Now@: " + stack + " size:" + stack.size());
+            
         }
+
+        System.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
+
+        System.out.println("Stack to String: [");
+        for (int j = 0; j < stack.size(); j++) {
+            System.out.print( stack.get(j).toString() +" , ");
+        }  
+        // ((aa|bb)*|c)
+        System.out.println("]");
+        System.out.println("============================================================");
+    }
+
+    private static NFA instanceOf(Object object) {
+        NFA nfa = new NFA();
+        return  nfa;
     }
 
     private static boolean isLetterOrDigit(char charAt) {
         return false;
+
     }
 
   

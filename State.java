@@ -3,24 +3,24 @@ import java.util.ArrayList;
 public class State {
      
     //class varaibles
-    private String nodeLabel; //A,B
-    private String nodeType; // 'start', 'final', 'normal
+    private String stateLabel; //A,B
+    private String stateType; // 'start', 'final', 'normal
     private int numberOfTransitions = 0;
     ArrayList<Transition> transitions = new ArrayList<Transition>();
 
-    public State(String nodeLabel, String nodeType) {
-        this.nodeLabel = nodeLabel;
-        this.nodeType = nodeType;
+    public State(String stateLabel, String stateType) {
+        this.stateLabel = stateLabel;
+        this.stateType = stateType;
         numberOfTransitions = numberOfTransitions + 1;
         transitions = new ArrayList<Transition>(numberOfTransitions );
     }   
 
-    public String getNodeLabel() {
-        return nodeLabel;
+    public String getStateLabel() {
+        return stateLabel;
     }
 
-    public String getNodeType() {
-        return nodeType;
+    public String getStateType() {
+        return stateType;
     }
 
     public ArrayList<Transition> getTransitions() {
@@ -45,6 +45,19 @@ public class State {
         } else {
             return false;
         }
+    }
+
+    public String toString() {
+        String output =  
+         "State Label: " + stateLabel + " State Type: " + stateType + " Number of Transitions: " + numberOfTransitions + "\n";
+        
+        // for (Transition transition : transitions) {
+        //     output += transition.toString() + "\n";
+        // }
+
+        
+
+        return output;
     }
 
     
