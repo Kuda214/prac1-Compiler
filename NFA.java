@@ -38,15 +38,15 @@ public class NFA {
     public void addState(State state ) {
     // State state = new State(nodeLabel, nodeType, numberOfTransitions);
 
-        if(!states.contains(state))
-        {
+        // if(!states.contains(state))
+        // {
             states.add(state);
             stateCount++;
             if (state.getStateType().equals("final")) {
                 finalStateCount++;
                 finalStates.add(state);
             }
-        }
+        // }
 
     }
         
@@ -139,35 +139,51 @@ public class NFA {
         return nfa;
     }
     
-    public NFA unionNFA(State from , State to , NFA firstOption, NFA secondOption)
+    public NFA unionNFA(NFA firstOption, NFA secondOption)
     {
         NFA nfa = new NFA();
 
-        nfa.addState(from);
-        nfa.setStartState(from);
+        // nfa.addState(from);
+        // nfa.setStartState(from);
 
-        nfa.addState(to);
-        nfa.setExitingState(to);
+        // nfa.addState(to);
+        // nfa.setExitingState(to);
 
-        nfa.addTransition(from, firstOption.getStartState(), null);
-        nfa.addTransition(from, secondOption.getStartState(), null);
+        // nfa.addTransition(from, firstOption.getStartState(), null);
+        // nfa.addTransition(from, secondOption.getStartState(), null);
 
-        nfa.addTransition(firstOption.getExitingState(), to, null);
-        nfa.addTransition(secondOption.getExitingState(), to, null);
+        // nfa.addTransition(firstOption.getExitingState(), to, null);
+        // nfa.addTransition(secondOption.getExitingState(), to, null);
 
         return nfa;
     }
 
-    public NFA zeroOrMore_AsteriskNFA(State from, NFA substituteNfa)
+    public NFA asteriskNFA( State fromState, NFA substituteNfa)
     {
         NFA nfa = new NFA();
 
-        nfa.addState(from);
-        nfa.setStartState(from);
-        nfa.setExitingState(from);
-        
-        nfa.addTransition(from, substituteNfa.getStartState(), null);
-        nfa.addTransition(substituteNfa.getExitingState(), from, null);
+
+        nfa.addState(fromState);
+        nfa.addTransition(substituteNfa.getExitingState(), fromState, null);
+
+
+        //add all states to nfa from substitute nfa
+        for(State state : substituteNfa.states)
+        {
+            nfa.addState(state);
+        }
+
+
+        nfa.setStartState(fromState);
+        nfa.setExitingState(fromState);
+
+
+        nfa.addTransition(fromState, substituteNfa.getStartState(), null);
+
+        System.out.println("\033[38;2;255;265;0m, prevNFAAAAA: " + substituteNfa.getExitingState() + "\033[0m");
+
+        System.out.println("\033[33m Combined NFA: "  +  nfa.toString()  + "\033[0m");
+
 
         return nfa;
     }

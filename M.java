@@ -60,11 +60,11 @@ public class M {
         //create NFA
         boolean isStart = true;
 
-        collectSubstrings(stringToTest, isStart);
+        collectSubstrings(stringToTest);
    
     }
 
-    public static void collectSubstrings(String stringToTest, boolean isStart )
+    public static void collectSubstrings(String stringToTest )
     {        
         for(int i =0; i < stringToTest.length(); i++) {
             
@@ -87,7 +87,12 @@ public class M {
                     }
                 }
             }
-            else if((Character.isLowerCase(stringToTest.charAt(i))) || (Character.isDigit(stringToTest.charAt(i)))  ) {
+            else if((Character.isLowerCase(stringToTest.charAt(i))) || (Character.isDigit(stringToTest.charAt(i))) || (Character.isUpperCase(stringToTest.charAt(i)))  ) {
+                
+                char c = ' ';
+                if(stack.get(stack.size()-1) instanceof Character)
+                    c = (char) stack.get(stack.size()-1);
+
                 if(stack.size() > 0){
                     System.out.println(stringToTest.charAt(i) + " is a character");
 
@@ -105,6 +110,46 @@ public class M {
                     
 
                         stack.add(tempNfa);
+
+                        //if prev is a | then trace back to find the nearest ( , ), *, +, ? then unionNFA
+
+
+                        // if(c == '|' )
+                        // {
+                            
+                        //     //find nearest (, ), *, +, ? then unionNFA
+
+                        //     for (int j = stack.size()-1; j >= 0; j--)
+                        //     {
+                        //         if(stack.get(j) instanceof Character)
+                        //         {
+                        //             char c2 = (char) stack.get(j);
+                        //             if(c2 == '(' || c2 == ')' || c2 == '*' || c2 == '+' || c2 == '?')
+                        //             {
+                        //                 //unionNFA
+                        //                 //prevNfa | tempNfa
+
+                        //                 NFA prevNFA = (NFA) stack.get(j+1);
+                        //                 NFA tempNfa2 = new NFA();
+
+                        //                 tempNfa = tempNfa.unionNFA(prevNFA, tempNfa2);
+
+                        //                 stack.remove(j+1);
+                        //                 stack.remove(j);
+                        //                 stack.add(tempNfa);
+
+
+                                      
+                        //                 break;
+                        //             }
+                        //         }
+                        //     }
+
+
+                        // }
+
+
+
                         // System.out.mprimmntln("Stack:mm " + stackn + " size:" + stack.size());
 
                     }
@@ -131,14 +176,89 @@ public class M {
                 }
 
             }
-            else if(stringToTest.charAt(i) == '|')
+            else if(stringToTest.charAt(i) == '|') //prev can be ) ,NFA, *, +, ?
             {
                 stack.add(stringToTest.charAt(i));
+            }
+            else if(stringToTest.charAt(i) == '*') // prev element in stack can be ) or nfa 
+            {
+                // stack.add(stringToTest.charAt(i));
 
-            }  
-            else if(stringToTest.charAt(i) == '*')
+                //check if prev is a )
+
+                //check if prev is a NFA
+
+                if(stack.get(stack.size()-1) instanceof Character)
+                {
+                    char c = (char) stack.get(stack.size()-1);
+
+                    if(c == ')' )
+                    {
+                        //find nearest (
+                        for (int j = stack.size()-1; j >= 0; j--)
+                        {
+                            if(stack.get(j) instanceof Character)
+                            {
+                                char c2 = (char) stack.get(j);
+                                if(c2 == '(')
+                                {
+                                    //find nearest NFA
+                                    for (int k = j+1; k < stack.size(); k++)
+                                    {
+                                        if(stack.get(k) instanceof NFA)
+                                        {
+                                            //starNFA
+                                            NFA prevNFA = (NFA) stack.get(k);
+                                            NFA tempNfa = new NFA();
+
+                                            State fromState = new State("q"+numOfState, "normal");
+
+                                            tempNfa = tempNfa.asteriskNFA(fromState,prevNFA);
+
+                                            stack.remove(k);
+                                            stack.remove(j);
+                                            stack.add(tempNfa);
+
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else if(stack.get(stack.size()-1) instanceof NFA)
+                {
+                    System.out.println("* with last thing NFA: " + stringToTest.charAt(i));
+                    //concatenate
+                    NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                    NFA tempNfa = new NFA();
+                    State fromState = new State("q"+numOfState, "normal");
+
+                    numOfState++;
+
+                    tempNfa = tempNfa.asteriskNFA(fromState, prevNFA);
+                    // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
+                    stack.remove(stack.size()-1);//remove previous item in stack 
+
+                    // stack.add(tempNfa);
+
+                    stack.add(tempNfa);
+
+                }
+            
+            }
+                      
+    
+                //check if prev is a NFA
+            else if(stringToTest.charAt(i) == '*') // prev element in stack can be ) or nfa 
             {
-                stack.add(stringToTest.charAt(i));
+                // stack.add(stringToTest.charAt(i));
+
+                //check if prev is a ()
+
+                //check if prev is a NFA
+
             }
             
         }
