@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.Stack;
+// import java.util.Stack;
 import java.util.regex.PatternSyntaxException;
 
 
@@ -33,7 +33,6 @@ public class M {
     }
 
     public static boolean ifPureRegex(String stringToTest) {
-        System.out.println(stringToTest + " " + stringToTest);
         boolean isSyntacticallyCorrect = false;
 
         isSyntacticallyCorrect =  ifSyntacticallyCorrect(stringToTest);
@@ -62,24 +61,17 @@ public class M {
         boolean isStart = true;
 
         collectSubstrings(stringToTest, isStart);
-
-
-        
+   
     }
 
     public static void collectSubstrings(String stringToTest, boolean isStart )
-    {
-        System.out.println("stringToTest: " + stringToTest + " " + stringToTest.length() );
-        System.out.println("Stack: " + stack + " size:" + stack.size());
-        
-        
+    {        
         for(int i =0; i < stringToTest.length(); i++) {
             
-           System.out.println("Char in question: " + stringToTest.charAt(i) + "\n");
+           System.out.println("Char in question: " + stringToTest.charAt(i) + "");
             if(stringToTest.charAt(i) == '(' || stringToTest.charAt(i) == ')') {
                 stack.add(stringToTest.charAt(i));
-                System.out.println("stringToTest: " + stringToTest + " " + stringToTest.length());
-                System.out.println("Stack: " + stack );
+                System.out.println("Stack Now : " + stack + " size:" + stack.size());
                 
                 if(stringToTest.charAt(i) == '(')
                 {
@@ -131,7 +123,7 @@ public class M {
                         // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
                         stack.remove(stack.size()-1);//remove previous item in stack 
 
-                       
+                        // stack.add(tempNfa);
 
                         stack.add(tempNfa);
 
@@ -139,29 +131,23 @@ public class M {
                 }
 
             }
-            if(stringToTest.charAt(i) == '|')
+            else if(stringToTest.charAt(i) == '|')
             {
                 stack.add(stringToTest.charAt(i));
 
             }  
-            if(stringToTest.charAt(i) == '*')
+            else if(stringToTest.charAt(i) == '*')
             {
                 stack.add(stringToTest.charAt(i));
             }
-            System.out.println("Stack Now@: " + stack + " size:" + stack.size());
             
         }
 
         System.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
 
-        System.out.println("Stack to String: [");
-        for (int j = 0; j < stack.size(); j++) {
-            System.out.print( stack.get(j).toString() +" , ");
-        }  
-        // ((aa|bb)*|c)
-        System.out.println("]");
-        System.out.println("============================================================");
-    }
+        System.out.println("Stack to String:  " + stack + " " + stack.size());
+    };
+    
 
     private static NFA instanceOf(Object object) {
         NFA nfa = new NFA();

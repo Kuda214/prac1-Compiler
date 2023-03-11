@@ -47,6 +47,8 @@ public class State {
         }
     }
 
+    
+
     public String toString() {
         String output =  
          "State Label: " + stateLabel + " State Type: " + stateType + " Number of Transitions: " + numberOfTransitions + "\n";
@@ -58,6 +60,11 @@ public class State {
         
 
         return output;
+    }
+
+    public void removeTransition(Transition transition) {
+        transitions.remove(transition);
+        
     }
 
     
