@@ -3,6 +3,8 @@ import java.util.Scanner;
 // import java.util.Stack;
 import java.util.regex.PatternSyntaxException;
 
+import javax.lang.model.util.ElementScanner14;
+
 
 public class M {
      
@@ -68,15 +70,11 @@ public class M {
     {        
         for(int i =0; i < stringToTest.length(); i++) {
             
-           System.out.println("Char in question: " + stringToTest.charAt(i) + "");
-            if(stringToTest.charAt(i) == '(' || stringToTest.charAt(i) == ')') {
-                stack.add(stringToTest.charAt(i));
-                System.out.println("Stack Now : " + stack + " size:" + stack.size());
-                
+            if(stringToTest.charAt(i) == '(' || stringToTest.charAt(i) == ')') {                
                 if(stringToTest.charAt(i) == '(')
                 {
-                    //find nearest )
-            
+                    //just add 
+                    stack.add(stringToTest.charAt(i));
                 }
                 else if(stringToTest.charAt(i) == ')' )
                 {
@@ -87,90 +85,183 @@ public class M {
                     }
                 }
             }
-            else if((Character.isLowerCase(stringToTest.charAt(i))) || (Character.isDigit(stringToTest.charAt(i))) || (Character.isUpperCase(stringToTest.charAt(i)))  ) {
+            else if(isAlphanumeric(stringToTest.charAt(i))) {
                 
                 char c = ' ';
                 if(stack.get(stack.size()-1) instanceof Character)
                     c = (char) stack.get(stack.size()-1);
 
-                if(stack.size() > 0){
+                if(stack.size() > 0) //starts with (
+                {
                     System.out.println(stringToTest.charAt(i) + " is a character");
 
                     if(stack.get(stack.size()-1) instanceof Character)
                     {
-                        //concatenate
-                        NFA tempNfa = new NFA();
-                        State fromState = new State("q"+numOfState, "normal");
-                        numOfState++;
-                        State toState = new State("q"+ numOfState, "normal");
-                        numOfState++;
 
-                      
-                        tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
-                    
+                        char cc = ' ';
+                        if((i+1) < stringToTest.length())
+                          cc = stringToTest.charAt(i+1);
 
-                        stack.add(tempNfa);
+                        if(cc != ' ') // not done traversing through the stringToTest
+                        {
+                            //check if next char is a special char
 
-                        //if prev is a | then trace back to find the nearest ( , ), *, +, ? then unionNFA
+                            if(cc == '*' || cc == '+' || cc == '?' )
+                            {
+                                if(cc == '*')
+                                {
+                                    NFA tempNfa = new NFA();
+                                    NFA asteriskNFA = new NFA();
+                                    State fromState = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    State toState = new State("q"+ numOfState, "normal");
+                                    numOfState++;
 
+                                    State fromState2 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    
+                                    tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
 
-                        // if(c == '|' )
-                        // {
+                                    asteriskNFA = tempNfa.asteriskNFA(fromState2, tempNfa);
+
+                                    tempNfa = asteriskNFA;
+                                    i++;
+                                
+                                    stack.add(tempNfa);
+                                }
+                                else if (cc == '+')
+                                {
+                                    NFA tempNfa = new NFA();
+                                    NFA plusNFA = new NFA();
+
+                                    State fromState = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    State toState = new State("q"+ numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState2 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState3 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    
+                                    tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+
+                                    plusNFA = tempNfa.oneOrMore_PlusNFA(fromState2, fromState3 , tempNfa);
+
+                                    tempNfa = plusNFA;
+                                    i++;
+                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                
+                                    stack.add(tempNfa);
+
+                                }
+                                else if (cc == '?')
+                                {
+                                    NFA tempNfa = new NFA();
+                                    NFA optionalNFA = new NFA();
+
+                                    State fromState = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    State toState = new State("q"+ numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState2 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState3 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    
+                                    tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+
+                                    optionalNFA = tempNfa.optionalNFA(fromState2, fromState3 , tempNfa);
+
+                                    tempNfa = optionalNFA;
+                                    i++;
+                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                
+                                    stack.add(tempNfa);
+                                }
+                            }
+                            else if(cc == '(' || cc == ')' || isAlphanumeric(cc) || cc == '|'  )
+                            {
+                                NFA tempNfa = new NFA();
+
+                                State fromState = new State("q"+numOfState, "normal");
+                                numOfState++;
+                                State toState = new State("q"+ numOfState, "normal");
+                                numOfState++;
+                                
+                                tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
                             
-                        //     //find nearest (, ), *, +, ? then unionNFA
+                                stack.add(tempNfa);
 
-                        //     for (int j = stack.size()-1; j >= 0; j--)
-                        //     {
-                        //         if(stack.get(j) instanceof Character)
-                        //         {
-                        //             char c2 = (char) stack.get(j);
-                        //             if(c2 == '(' || c2 == ')' || c2 == '*' || c2 == '+' || c2 == '?')
-                        //             {
-                        //                 //unionNFA
-                        //                 //prevNfa | tempNfa
+                            }
+                        }
+                        else // no next thing to check 
+                        {
+                            NFA tempNfa = new NFA();
 
-                        //                 NFA prevNFA = (NFA) stack.get(j+1);
-                        //                 NFA tempNfa2 = new NFA();
+                            State fromState = new State("q"+numOfState, "normal");
+                            numOfState++;
+                            State toState = new State("q"+ numOfState, "normal");
+                            numOfState++;
+                            
+                            tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
 
-                        //                 tempNfa = tempNfa.unionNFA(prevNFA, tempNfa2);
-
-                        //                 stack.remove(j+1);
-                        //                 stack.remove(j);
-                        //                 stack.add(tempNfa);
-
-
-                                      
-                        //                 break;
-                        //             }
-                        //         }
-                        //     }
-
-
-                        // }
-
-
-
-                        // System.out.mprimmntln("Stack:mm " + stackn + " size:" + stack.size());
-
+                            stack.add(tempNfa);
+                        }
                     }
                     else if(stack.get(stack.size()-1) instanceof NFA)
                     {
-                        //concatenate
-                        NFA prevNFA = (NFA) stack.get(stack.size()-1);
-                        NFA tempNfa = new NFA();
-                        State fromState = prevNFA.getExitingState() ;
-                        // State fromState = new State("q"+numOfState, "normal");
+                        char nextChar = ' ';
 
-                        State toState = new State("q"+ numOfState, "normal");
-                        numOfState++;
+                        if((i+1) < stringToTest.length())
+                            nextChar = stringToTest.charAt(i+1);
 
-                        tempNfa = tempNfa.alphanumericNFA(prevNFA , fromState, toState, stringToTest.charAt(i)+ "");
-                        // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
-                        stack.remove(stack.size()-1);//remove previous item in stack 
+                        if(nextChar != ' ') // not done traversing through the stringToTest
+                        {
+                            if(nextChar == '*')
+                            {   
+                                NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                                NFA tempNfa = new NFA();
+                                
+                                State fromState = new State("q" + numOfState, "normal");
+                                numOfState++;
 
-                        // stack.add(tempNfa);
+                                tempNfa = tempNfa.asteriskNFA(fromState, prevNFA);
 
-                        stack.add(tempNfa);
+                                // stack.add(tempNfa);
+
+                                stack.add(tempNfa);
+
+                            }
+                            else if(nextChar == '+')
+                            {
+
+                            }
+                            else if(nextChar == '?')
+                            {
+
+                            }
+                            else if(nextChar == '|')
+                            {
+
+                            }
+                            else if(nextChar == '(')
+                            {
+
+                            }
+                            else if(nextChar == ')')
+                            {
+
+                            }
+                            else if(isAlphanumeric(nextChar))
+                            {
+
+                            }
+                        }
+
 
                     }
                 }
@@ -182,13 +273,9 @@ public class M {
             }
             else if(stringToTest.charAt(i) == '*') // prev element in stack can be ) or nfa 
             {
-                // stack.add(stringToTest.charAt(i));
+                System.out.println(stringToTest.charAt(i) + " is a *=============================");
 
-                //check if prev is a )
-
-                //check if prev is a NFA
-
-                if(stack.get(stack.size()-1) instanceof Character)
+                if(stack.get(stack.size()-1) instanceof Character) // prev ')'
                 {
                     char c = (char) stack.get(stack.size()-1);
 
@@ -227,7 +314,7 @@ public class M {
                         }
                     }
                 }
-                else if(stack.get(stack.size()-1) instanceof NFA)
+                else if(stack.get(stack.size()-1) instanceof NFA) //prev is a NFA
                 {
                     System.out.println("* with last thing NFA: " + stringToTest.charAt(i));
                     //concatenate
@@ -248,16 +335,17 @@ public class M {
                 }
             
             }
-                      
-    
-                //check if prev is a NFA
-            else if(stringToTest.charAt(i) == '*') // prev element in stack can be ) or nfa 
+            else if(stringToTest.charAt(i) == '+') // prev element in stack can be ) or nfa 
             {
                 // stack.add(stringToTest.charAt(i));
 
                 //check if prev is a ()
 
                 //check if prev is a NFA
+
+            }
+            else if(stringToTest.charAt(i) == '?')
+            {
 
             }
             
@@ -274,11 +362,37 @@ public class M {
         return  nfa;
     }
 
-    private static boolean isLetterOrDigit(char charAt) {
-        return false;
+    private static boolean isAlphanumeric(char charAt) {
+        if((Character.isLowerCase(charAt)) || (Character.isDigit(charAt)) || (Character.isUpperCase(charAt))  )
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
 
     }
 
   
 
 }
+
+
+  // System.out.println("\u001B[39m prev is NFA " + stringToTest.charAt(i) + " \u001B[0m");
+                        // //concatenate
+                        // NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                        // NFA tempNfa = new NFA();
+                        // State fromState = prevNFA.getExitingState() ;
+                        // // State fromState = new State("q"+numOfState, "normal");
+
+                        // State toState = new State("q"+ numOfState, "normal");
+                        // numOfState++;
+
+                        // tempNfa = tempNfa.alphanumericNFA(prevNFA , fromState, toState, stringToTest.charAt(i)+ "");
+                        // // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
+                        // stack.remove(stack.size()-1);//remove previous item in stack 
+
+                        // // stack.add(tempNfa);
+
+                        // stack.add(tempNfa);

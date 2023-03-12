@@ -205,13 +205,13 @@ public class NFA {
             nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
         } 
 
-       
-
         nfa.setStartState(fromState);
         nfa.setExitingState(fromState);
 
         nfa.addTransition(fromState, substituteNfa.getStartState(), null);
         nfa.addTransition(substituteNfa.getExitingState(), fromState, null);
+
+        // remove duplicate transitions from nfa
       
         System.out.println("\033[33m Asterisk NFA: "  +  nfa.toString()  + "\033[0m");
 
@@ -223,9 +223,29 @@ public class NFA {
         NFA nfa = new NFA();
 
         nfa.addState(from);
-        nfa.setStartState(from);
+        nfa.addState(substituteNfa.getExitingState());
 
-        nfa.addState(to);
+        for(State state : substituteNfa.states)
+        {
+            nfa.addState(state);
+        }
+
+        ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
+        for(State state : substituteNfa.states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        //remove duplicate transitions from transitionsToAdd
+        for(Transition transition : transitionsToAdd) {
+            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
+            if(nfa.transitions.contains(transition)) continue;
+            else // Skip if transition already exists in new list
+            nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        } 
+
+        nfa.setStartState(from);
         nfa.setExitingState(to);
 
         nfa.addTransition(from, substituteNfa.getStartState(), null);
@@ -240,14 +260,34 @@ public class NFA {
         NFA nfa = new NFA();
 
         nfa.addState(from);
-        nfa.setStartState(from);
+        nfa.addState(substituteNfa.getExitingState());
 
-        nfa.addState(to);
+        for(State state : substituteNfa.states)
+        {
+            nfa.addState(state);
+        }
+
+        ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
+        for(State state : substituteNfa.states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        //remove duplicate transitions from transitionsToAdd
+        for(Transition transition : transitionsToAdd) {
+            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
+            if(nfa.transitions.contains(transition)) continue;
+            else // Skip if transition already exists in new list
+            nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        } 
+
+        nfa.setStartState(from);
         nfa.setExitingState(to);
 
         nfa.addTransition(from, substituteNfa.getStartState(), null);
-        nfa.addTransition(from, to, null);
         nfa.addTransition(substituteNfa.getExitingState(), to, null);
+        nfa.addTransition(from, to, null);
 
         return nfa;
     }
