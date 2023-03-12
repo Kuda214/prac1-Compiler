@@ -225,41 +225,62 @@ public class M {
                             {   
                                 NFA prevNFA = (NFA) stack.get(stack.size()-1);
                                 NFA tempNfa = new NFA();
-                                
+
                                 State fromState = new State("q" + numOfState, "normal");
                                 numOfState++;
 
                                 tempNfa = tempNfa.asteriskNFA(fromState, prevNFA);
-
-                                // stack.add(tempNfa);
+                                i++;
 
                                 stack.add(tempNfa);
 
                             }
                             else if(nextChar == '+')
                             {
+                                NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                                NFA tempNfa = new NFA();
 
+                                State fromState = new State("q" + numOfState, "normal");
+                                numOfState++;
+
+                                State fromState2 = new State("q" + numOfState, "normal");
+                                numOfState++;
+
+                                tempNfa = tempNfa.oneOrMore_PlusNFA(fromState,fromState2, prevNFA);
+                                i++;
+
+                                stack.add(tempNfa);
                             }
                             else if(nextChar == '?')
                             {
+                                NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                                NFA tempNfa = new NFA();
 
+                                State fromState = new State("q" + numOfState, "normal");
+                                numOfState++;
+
+                                State fromState2 = new State("q" + numOfState, "normal");
+                                numOfState++;
+
+                                tempNfa = tempNfa.optionalNFA(fromState,fromState2, prevNFA);
+                                i++;
+
+                                stack.add(tempNfa);
                             }
-                            else if(nextChar == '|')
+                            else if(nextChar == '|' ||nextChar == '(' || nextChar == ')' || isAlphanumeric(nextChar))
                             {
+                                NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                                NFA tempNfa = new NFA();
 
-                            }
-                            else if(nextChar == '(')
-                            {
+                                State from = prevNFA.getExitingState();
+                                State to = new State("q" + numOfState, "normal");
+                                numOfState++;
 
-                            }
-                            else if(nextChar == ')')
-                            {
+                                tempNfa = tempNfa.alphanumericNFA(prevNFA,from,to, stringToTest.charAt(i)+ "");
 
+                                stack.add(tempNfa);
                             }
-                            else if(isAlphanumeric(nextChar))
-                            {
-
-                            }
+                           
                         }
 
 
