@@ -9,10 +9,15 @@ public class NFA {
     private State exitingState ;
     private ArrayList<State> states = new ArrayList<State>(); //vertices
     private ArrayList<State> finalStates = new ArrayList<State>();
+    private ArrayList<Transition> transitions = new ArrayList<Transition>(); //edges
 
     public NFA() {
         //constructor
 
+    }
+
+    public ArrayList<Transition> geTransitions() {
+        return this.transitions;
     }
 
     public void setStartState(State state)
@@ -38,15 +43,15 @@ public class NFA {
     public void addState(State state ) {
     // State state = new State(nodeLabel, nodeType, numberOfTransitions);
 
-        // if(!states.contains(state))
-        // {
+        if(!states.contains(state))
+        {
             states.add(state);
             stateCount++;
             if (state.getStateType().equals("final")) {
                 finalStateCount++;
                 finalStates.add(state);
             }
-        // }
+        }
 
     }
         
@@ -55,8 +60,22 @@ public class NFA {
         transition.setTransitionFrom(from);
         transition.setTransitionTo(to);
 
-        from.addTransition(transition);
-        // to.addTransition(transition);
+        //check if from does not have the same transition before adding
+
+        if(!from.getTransitions().contains(transition))
+        {
+            from.addTransition(transition);
+            
+        }
+
+        //check if transition does not exist before adding
+        if(!transitions.contains(transition))
+        {
+            //print transition in dark pink 
+            System.out.println("\033[38;2;255;0;255m, transition: " + transition.toString() + "\033[0m");
+            transitions.add(transition);
+        }
+        
     }
 
     public NFA alphanumericNFA(NFA nfa , State from , State to , String transitionValue)
@@ -162,28 +181,39 @@ public class NFA {
     {
         NFA nfa = new NFA();
 
-
         nfa.addState(fromState);
-        nfa.addTransition(substituteNfa.getExitingState(), fromState, null);
+        nfa.addState(substituteNfa.getExitingState());
 
-
-        //add all states to nfa from substitute nfa
         for(State state : substituteNfa.states)
         {
             nfa.addState(state);
         }
 
+        //add all transitions to nfa from substitute nfa
+        ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
+        for(State state : substituteNfa.states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        //remove duplicate transitions from transitionsToAdd
+        for(Transition transition : transitionsToAdd) {
+            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
+            if(nfa.transitions.contains(transition)) continue;
+            else // Skip if transition already exists in new list
+            nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        } 
+
+       
 
         nfa.setStartState(fromState);
         nfa.setExitingState(fromState);
 
-
         nfa.addTransition(fromState, substituteNfa.getStartState(), null);
-
-        System.out.println("\033[38;2;255;265;0m, prevNFAAAAA: " + substituteNfa.getExitingState() + "\033[0m");
-
-        System.out.println("\033[33m Combined NFA: "  +  nfa.toString()  + "\033[0m");
-
+        nfa.addTransition(substituteNfa.getExitingState(), fromState, null);
+      
+        System.out.println("\033[33m Asterisk NFA: "  +  nfa.toString()  + "\033[0m");
 
         return nfa;
     }
@@ -228,14 +258,18 @@ public class NFA {
         
         String statesString  = "";
 
+        //print all states
+        for(State state : states) {
+            System.out.println("\u001B[34m " + state+ "\u001B[0m");
+        }
+
         //q0(a)-q1(b)-q2(c)-q3
-        if(states.size() > 0)
+        if(transitions.size() > 0)
         {
-            statesString = states.get(0).getTransitions().toString();
-            for(int i = 1; i < states.size()-1; i++)
-            {
-                statesString += ", " + states.get(i).getTransitions().toString();
-            }
+            for(Transition transition : transitions) {
+                System.out.println("\u001B[36m " + transition+ "\u001B[0m");
+                statesString += transition + " , ";
+            }   
         }
         else
         {
