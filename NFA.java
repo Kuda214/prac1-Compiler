@@ -295,19 +295,17 @@ public class NFA {
     @Override
     public String toString() {
 
-        
         String statesString  = "";
 
         //print all states
-        for(State state : states) {
-            System.out.println("\u001B[34m " + state+ "\u001B[0m");
-        }
+        // for(State state : states) {
+        //     System.out.println("\u001B[34m " + state+ "\u001B[0m");
+        // }
 
         //q0(a)-q1(b)-q2(c)-q3
         if(transitions.size() > 0)
         {
             for(Transition transition : transitions) {
-                System.out.println("\u001B[36m " + transition+ "\u001B[0m");
                 statesString += transition + " , ";
             }   
         }

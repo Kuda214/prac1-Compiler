@@ -51,7 +51,7 @@ public class State {
 
     public String toString() {
         String output =  
-         "State Label: " + stateLabel + " State Type: " + stateType + " Number of Transitions: " + numberOfTransitions + "\n";
+         "State Label: " + stateLabel + " State Type: " + stateType + " Number of Transitions: " + numberOfTransitions + "";
         
         // for (Transition transition : transitions) {
         //     output += transition.toString() + "\n";
