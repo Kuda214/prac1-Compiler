@@ -71,8 +71,7 @@ public class NFA {
         //check if transition does not exist before adding
         if(!transitions.contains(transition))
         {
-            //print transition in dark pink 
-            System.out.println("\033[38;2;255;0;255m, transition: " + transition.toString() + "\033[0m");
+            //print transition in dark pin
             transitions.add(transition);
         }
         
@@ -104,6 +103,8 @@ public class NFA {
             alNfa.addTransition(from, to, transitionValue);
         }
 
+        
+
         System.out.println("\033[38;2;255;265;0m, alNfa: " + alNfa.toString() + "\033[0m");
         System.out.println("Num of states: " + alNfa.states);
         // System.out.println("Num of final states: " + finalStateCount);/
@@ -111,24 +112,6 @@ public class NFA {
         return alNfa;
     }
 
-    public NFA removeExcessTransitions(NFA alNfa) {
-       
-        //color output green and yellow
-        // System.out.println("\033[38;2;255;265;0m, NFA to sort: "  + alNfa  + "\033[0m");
-        //remove excess transitions and concatenate the nfas
-        // if(alNfa..size() > 2)
-        // {
-        //     // connect all the mini nfas to the first nfa and remove the excess transitions
-
-        //     for()
-
-
-        // }
-
-      
-
-        return alNfa;
-    }
 
     public NFA concatenation(NFA prevNFA, NFA newNFA)
     {
@@ -158,21 +141,60 @@ public class NFA {
         return nfa;
     }
     
-    public NFA unionNFA(NFA firstOption, NFA secondOption)
+    public NFA unionNFA (State from, State to  ,NFA firstOption, NFA secondOption)
     {
         NFA nfa = new NFA();
 
-        // nfa.addState(from);
-        // nfa.setStartState(from);
+        nfa.addState(from);
+        nfa.setStartState(from);
 
-        // nfa.addState(to);
-        // nfa.setExitingState(to);
+        nfa.addState(to);
+        nfa.setExitingState(to);
 
-        // nfa.addTransition(from, firstOption.getStartState(), null);
-        // nfa.addTransition(from, secondOption.getStartState(), null);
 
-        // nfa.addTransition(firstOption.getExitingState(), to, null);
-        // nfa.addTransition(secondOption.getExitingState(), to, null);
+        for(State state : firstOption.states)
+        {
+            nfa.addState(state);
+        }
+
+        for(State state : secondOption.states)
+        {
+
+            nfa.addState(state);
+        }
+
+        //add all transitions to nfa from substitute nfa
+        ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
+        for(State state : firstOption.states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        for(State state : secondOption.states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        //remove duplicate transitions from transitions
+
+        nfa.transitions.clear();
+        for(Transition transition : transitionsToAdd)
+        {
+            if(!nfa.transitions.contains(transition))
+            {
+                nfa.transitions.add(transition);
+            }
+        }
+
+        nfa.addTransition(from, firstOption.getStartState(), null);
+        nfa.addTransition(from, secondOption.getStartState(), null);
+
+        nfa.addTransition(firstOption.getExitingState(), to, null);
+        nfa.addTransition(secondOption.getExitingState(), to, null);
+
+        System.out.println("\033[38;2;255;265;0m, unionNFA: " + nfa.toString() + "\033[0m");
 
         return nfa;
     }
@@ -197,13 +219,16 @@ public class NFA {
             }
         }
 
-        //remove duplicate transitions from transitionsToAdd
-        for(Transition transition : transitionsToAdd) {
-            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
-            if(nfa.transitions.contains(transition)) continue;
-            else // Skip if transition already exists in new list
-            nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
-        } 
+        //remove duplicate transitions from transitions
+
+        nfa.transitions.clear();
+        for(Transition transition : transitionsToAdd)
+        {
+            if(!nfa.transitions.contains(transition))
+            {
+                nfa.transitions.add(transition);
+            }
+        }
 
         nfa.setStartState(fromState);
         nfa.setExitingState(fromState);
@@ -237,13 +262,16 @@ public class NFA {
             }
         }
 
-        //remove duplicate transitions from transitionsToAdd
-        for(Transition transition : transitionsToAdd) {
-            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
-            if(nfa.transitions.contains(transition)) continue;
-            else // Skip if transition already exists in new list
-            nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
-        } 
+        //remove duplicate transitions from transitions
+
+        nfa.transitions.clear();
+        for(Transition transition : transitionsToAdd)
+        {
+            if(!nfa.transitions.contains(transition))
+            {
+                nfa.transitions.add(transition);
+            }
+        }
 
         nfa.setStartState(from);
         nfa.setExitingState(to);
@@ -306,7 +334,7 @@ public class NFA {
         if(transitions.size() > 0)
         {
             for(Transition transition : transitions) {
-                statesString += transition + " , ";
+                statesString += transition + "\n ";
             }   
         }
         else
@@ -332,6 +360,66 @@ public class NFA {
 
         return nfa;
 
+    }
+
+    public NFA removeDuplicateTransitions() {
+
+        //remove duplicate transitions from nfa
+        ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
+
+        for(State state : states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        //remove duplicate transitions from transitionsToAdd
+        for(Transition transition : transitionsToAdd) {
+            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
+            if(transitions.contains(transition)) continue;
+            else // Skip if transition already exists in new list
+            addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        }
+
+        transitions = transitionsToAdd;
+
+        return this;
+
+    }
+
+    public NFA addTransitionsfromPrevNFA(NFA prevNFA) {
+
+        // this.addTransition(startState, exitingState, null);
+
+        //ADD states from prevNFA to this NFA
+        for(State state : prevNFA.states) {
+            this.addState(state);
+        }
+
+        //add all transitions to nfa from substitute nfa
+        ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
+
+        for(State state : states) {
+            for(Transition transition : state.getTransitions()) {
+                transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
+            }
+        }
+
+        //remove duplicate transitions from transitionsToAdd
+
+        transitions.clear();    
+        for(Transition transition : transitionsToAdd) {
+            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
+            if(transitions.contains(transition)) continue;
+            else // Skip if transition already exists in new list
+            addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        }
+
+        transitions = transitionsToAdd;
+
+        return this;
+
+        // return null;
     }
 
 

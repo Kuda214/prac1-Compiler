@@ -97,23 +97,41 @@ public class M {
                         }
                     }
 
+                    System.out.println( "tempIndex is:  " + tempIndex);
+
                     //create a subset of the stack from the nearest '(' to the nearest ')'
                     for (int j = tempIndex; j < stack.size(); j++)
                     {
                         tempStack.add(stack.get(j));
+
                     }
                     System.out.println( "substring is:  " + tempStack);
 
-
                     tempNFA = resolveObjectsToNFA(tempStack);
-                
+
+                    //remove the subset from the stack
+                    System.out.println("temp index: " + tempIndex + " thats: " + stack.get(tempIndex) );
+                    
+                    ArrayList<Object> tempStack2 = new ArrayList<Object>();
+
+                    for (int j = 0; j < tempIndex; j++)
+                    {
+                        tempStack2.add(stack.get(j));
+                    }
+
+                    stack = tempStack2;
+
+                    System.out.println("After removing: " + stack + " size: " + stack.size());
+                    stack.add(tempNFA);
+                    System.out.println("After Adding combined nfa: " + stack + " size: " + stack.size());
 
                 }
             }
             else if(isAlphanumeric(stringToTest.charAt(i))) {
                 
                 char c = ' ';
-                if(stack.get(stack.size()-1) instanceof Character)
+                
+                if(stack.size() > 0 &&  stack.get(stack.size()-1) instanceof Character)
                     c = (char) stack.get(stack.size()-1);
 
                 if(stack.size() > 0) //starts with (
@@ -152,7 +170,7 @@ public class M {
 
                                     asteriskNFA = tempNfa.asteriskNFA(fromState2, tempNfa);
 
-                                    tempNfa = asteriskNFA.alphanumericNFA(asteriskNFA, fromState2, toState, stringToTest);
+                                    // tempNfa = asteriskNFA.alphanumericNFA(asteriskNFA, fromState2, toState, stringToTest);
 
                                     tempNfa = asteriskNFA;
                                     i++;
@@ -278,14 +296,19 @@ public class M {
                                 State fromState = new State("q" + numOfState, "normal");
                                 numOfState++;
 
-                                tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
+                                tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i)+ "");
+
                                 asteriskNFA = tempNfa.asteriskNFA(fromState, tempNfa);
 
-                                asteriskNFA.addTransition(prevNFA.getExitingState(), fromState, null);
+                                tempNfa = asteriskNFA.alphanumericNFA(asteriskNFA, prevNFA.getExitingState(), fromState, null);
 
+                                tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
+
+                                tempNfa = asteriskNFA;
                                 i++;
+                                stack.remove(stack.size()-1);
 
-                                stack.add(asteriskNFA);
+                                stack.add(tempNfa);
 
                             }
                             else if(nextChar == '+')
@@ -311,11 +334,17 @@ public class M {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 oneOrMoreNFA = tempNfa.oneOrMore_PlusNFA(fromState,fromState2, tempNfa);
 
-                                oneOrMoreNFA.addTransition(prevNFA.getExitingState(), fromState, null);
+                                // oneOrMoreNFA.addTransition(prevNFA.getExitingState(), fromState, null);
+                                tempNfa = oneOrMoreNFA.alphanumericNFA(oneOrMoreNFA, prevNFA.getExitingState(), fromState, null);
 
+                                tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
+
+                                tempNfa = oneOrMoreNFA;
                                 i++;
+                                stack.remove(stack.size()-1);
 
-                                stack.add(oneOrMoreNFA);
+                                stack.add(tempNfa);
+
                             }
                             else if(nextChar == '?')
                             {
@@ -340,10 +369,17 @@ public class M {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 optionalNFA = tempNfa.optionalNFA(fromState,fromState2, tempNfa);
 
-                                optionalNFA.addTransition(fromState, prevNFA.getExitingState(), null);
-                                i++;
+                                // optionalNFA.addTransition(fromState, prevNFA.getExitingState(), null);
 
-                                stack.add(optionalNFA);
+                                tempNfa = optionalNFA.alphanumericNFA(optionalNFA, prevNFA.getExitingState(), fromState, null);
+
+                                tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
+
+                                tempNfa = optionalNFA;
+                                i++;
+                                stack.remove(stack.size()-1);
+
+                                stack.add(tempNfa);
                             }
                             else if(nextChar == '|' ||nextChar == '(' || nextChar == ')' || isAlphanumeric(nextChar))
                             {
@@ -376,11 +412,153 @@ public class M {
                         }
                     }
                 }
+                else 
+                {
+                    // starts with an alphanumeric
+
+                    if(isAlphanumeric(stringToTest.charAt(i)))
+                    {
+                        
+                        char cc = ' ';
+                        if((i+1) < stringToTest.length())
+                          cc = stringToTest.charAt(i+1);
+
+                        if(cc != ' ') // not done traversing through the stringToTest
+                        {
+                            //check if next char is a special char
+
+                            if(cc == '*' || cc == '+' || cc == '?' )
+                            {
+                                if(cc == '*')
+                                {
+                                    System.out.println( "prev char is: " + c + "and next char is character is: *");
+
+
+                                    NFA tempNfa = new NFA();
+                                    NFA asteriskNFA = new NFA();
+                                    State fromState = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    State toState = new State("q"+ numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState2 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState3 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    
+                                    tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+
+                                    asteriskNFA = tempNfa.asteriskNFA(fromState2, tempNfa);
+
+                                    tempNfa = asteriskNFA.alphanumericNFA(asteriskNFA, asteriskNFA.getExitingState(), fromState3, null);
+
+                                    tempNfa = asteriskNFA;
+                                    i++;
+                                
+                                    stack.add(tempNfa);
+                                }
+                                else if (cc == '+')
+                                {
+                                    System.out.println( "prev char is: " + c + "and next char is character is: +");
+
+                                    NFA tempNfa = new NFA();
+                                    NFA plusNFA = new NFA();
+
+                                    State fromState = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    State toState = new State("q"+ numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState2 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState3 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    
+                                    tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+
+                                    plusNFA = tempNfa.oneOrMore_PlusNFA(fromState2, fromState3 , tempNfa);
+
+                                    // tempNfa = asteriskNFA.alphanumericNFA(asteriskNFA, asteriskNFA.getExitingState(), fromState3, null);
+
+
+                                    tempNfa = plusNFA;
+                                    i++;
+                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                
+                                    stack.add(tempNfa);
+
+                                }
+                                else if (cc == '?')
+                                {
+                                    System.out.println( "prev char is: " + c + "and next char is character is: ?");
+
+                                    NFA tempNfa = new NFA();
+                                    NFA optionalNFA = new NFA();
+
+                                    State fromState = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    State toState = new State("q"+ numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState2 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+
+                                    State fromState3 = new State("q"+numOfState, "normal");
+                                    numOfState++;
+                                    
+                                    tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+
+                                    optionalNFA = tempNfa.optionalNFA(fromState2, fromState3 , tempNfa);
+
+                                    tempNfa = optionalNFA;
+                                    i++;
+                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                
+                                    stack.add(tempNfa);
+                                }
+                            }
+                            else if(cc == '(' || cc == ')' || isAlphanumeric(cc) || cc == '|'  )
+                            {
+                                System.out.println( "prev char is: " + c + "and next char is character is: (<), (|), (char), ()) ");
+
+                                NFA tempNfa = new NFA();
+
+                                State fromState = new State("q"+numOfState, "normal");
+                                numOfState++;
+                                State toState = new State("q"+ numOfState, "normal");
+                                numOfState++;
+                                
+                                tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+                            
+                                stack.add(tempNfa);
+
+                            }
+                        }
+                        else // no next thing to check 
+                        {
+                            System.out.println( "prev char is: " + c + "and no NEXT cgar");
+
+                            NFA tempNfa = new NFA();
+
+                            State fromState = new State("q"+numOfState, "normal");
+                            numOfState++;
+                            State toState = new State("q"+ numOfState, "normal");
+                            numOfState++;
+                            
+                            tempNfa = tempNfa.alphanumericNFA(null, fromState, toState, stringToTest.charAt(i)+ "");
+
+                            stack.add(tempNfa);
+                        }
+                    }
+
+                }
             }
             else if(stringToTest.charAt(i) == '|') //prev can be ) ,NFA, *, +, ?
             {
                 stack.add(stringToTest.charAt(i));
-                System.out.println( "just added | to stack");
+                System.out.println( "just added to stack");
 
             }
             else if(stringToTest.charAt(i) == '*') // prev element in stack can be ) or nfa 
@@ -510,9 +688,28 @@ public class M {
             
         }
 
+        System.out.println("End of string reached");
+        // All is done now resolve the stack to NFA
+
+        if (stack.size() > 1)
+        {
+            NFA finalNFA = resolveObjectsToNFA(stack);
+
+            stack.clear();
+    
+            finalNFA.removeDuplicateTransitions();
+            System.out.println("Stack cleared " + finalNFA);
+    
+    
+            stack.add(finalNFA);
+    
+        }
+      
+
         System.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
 
         System.out.println("Stack to String:  " + stack + " " + stack.size());
+        return;
 
   
 
@@ -520,14 +717,128 @@ public class M {
 
     private static NFA resolveObjectsToNFA(ArrayList<Object> tempStack) {
 
-        System.out.println("Stack to resolve: ---------" + tempStack   );
+        
 
-        NFA tempNFA = new NFA();
+        //color output in orange
+        System.out.println("\u001B[33m Stack to resolve: ---------" + tempStack +" sized: " + tempStack.size() +   " \u001B[0m");
+
+        //remove firs element in stack
+        if(tempStack.get(0) instanceof Character)
+        {
+            char c = (char) tempStack.get(0);
+            if(c == '(')
+            {
+                tempStack.remove(0);
+            }
+        }
+
+        if(tempStack.size() == 1) //only one nfa
+        {
+            if(tempStack.get(0) instanceof NFA)
+            {
+                System.out.println("\u001B[30m Resolved to: ---------" + (NFA) tempStack.get(0) + " \u001B[0m");
+
+                return (NFA) tempStack.get(0);
+            }
+        }
+        else  //more than one nfa 
+        {
+            //count number of 
+
+            int count = 0;
+
+            for (int i = 0; i < tempStack.size(); i++)
+            {
+                if(tempStack.get(i) instanceof Character)
+                {
+                    char c = (char) tempStack.get(i);
+                    if(c == '|')
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            if(count > 0)
+            {
+                
+            //if temp stack has a | as one of the elements
+
+            ArrayList<Object> stackToAlter = new ArrayList<Object>(tempStack);
+           
+            for(Object obj : tempStack)
+            {
+                if(obj instanceof Character)
+                {
+                    char c = (char) obj;
+                    if(c == '|')
+                    {
+                        //union operator 
+                        NFA nfa = (NFA) tempStack.get(tempStack.indexOf(obj)-1); 
+                        NFA nfa2 = (NFA) tempStack.get(tempStack.indexOf(obj)+1);
+
+                        State fromState = new State("q"+numOfState, "normal");
+                        numOfState++;
+                        State toState = new State("q"+numOfState, "normal");
+                        numOfState++;
+
+                        System.out.println("\u001B[31m First NFA: ---------" + nfa + " \u001B[0m");
+                        System.out.println("\u001B[31m Second NFA: ---------" + nfa2 + " \u001B[0m");
+
+                        NFA tempNFA = new NFA();
+                        tempNFA = tempNFA.unionNFA(fromState, toState , nfa, nfa2);
+
+                        //remove the two nfa and the | from the stack
+                        stackToAlter.remove(nfa);
+                        stackToAlter.remove(stackToAlter.indexOf(obj));
+                        stackToAlter.remove(nfa2);
+
+                      
+
+                        System.out.println("Temp stack after removal of stuff: " + stackToAlter + " Sized: " + stackToAlter.size());
+
+                        stackToAlter.add(0, tempNFA);
+
+                        // recursive call to resolveObjectsToNFA
+                        System.out.println("recursive call to resolveObjectsToNFA with tempStack: " + stackToAlter + " Sized: " + stackToAlter.size());
+                        tempNFA = resolveObjectsToNFA(stackToAlter);
+                        return tempNFA;
+                    }
+                }
+            }
+        }
+        else
+        {
+            //many nfas next to each other 
+
+            //check if all elements of tempStack are nfas
+
+            boolean allNFA = true;
+
+            for (int i = 0; i < tempStack.size(); i++)
+            {
+                if(!(tempStack.get(i) instanceof NFA))
+                {
+                    allNFA = false;
+                }
+            }
+
+            if(allNFA == true)
+            {
+
+            }
+
+
+        }
+    }
+
+
+       
 
 
         
 
-        return null;
+        return (NFA) tempStack.get(0);
     }
 
     private static NFA instanceOf(Object object) {
