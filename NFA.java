@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class NFA {
     //class varaibles
@@ -109,6 +110,8 @@ public class NFA {
         System.out.println("Num of states: " + alNfa.states);
         // System.out.println("Num of final states: " + finalStateCount);/
 
+        alNfa.removeDuplicateStatesAndTransitions();
+
         return alNfa;
     }
 
@@ -126,6 +129,8 @@ public class NFA {
 
         System.out.println("\033[33m Combined NFA: "  +  nfa.toString()  + "\033[0m");
 
+        nfa.removeDuplicateStatesAndTransitions();
+
         return nfa;
     }
 
@@ -137,6 +142,8 @@ public class NFA {
         nfa.setExitingState(two.getExitingState());
 
         nfa.addTransition(one.getExitingState(), two.getStartState(), null);
+
+        nfa.removeDuplicateStatesAndTransitions();
 
         return nfa;
     }
@@ -196,6 +203,8 @@ public class NFA {
 
         System.out.println("\033[38;2;255;265;0m, unionNFA: " + nfa.toString() + "\033[0m");
 
+        nfa.removeDuplicateStatesAndTransitions();
+
         return nfa;
     }
 
@@ -240,6 +249,8 @@ public class NFA {
       
         System.out.println("\033[33m Asterisk NFA: "  +  nfa.toString()  + "\033[0m");
 
+        nfa.removeDuplicateStatesAndTransitions();
+
         return nfa;
     }
 
@@ -280,6 +291,8 @@ public class NFA {
         nfa.addTransition(substituteNfa.getExitingState(), to, null);
         nfa.addTransition(to, from, null);
 
+        nfa.removeDuplicateStatesAndTransitions();
+
         return nfa;
     }
 
@@ -317,6 +330,8 @@ public class NFA {
         nfa.addTransition(substituteNfa.getExitingState(), to, null);
         nfa.addTransition(from, to, null);
 
+        nfa.removeDuplicateStatesAndTransitions();
+
         return nfa;
     }
 
@@ -341,6 +356,7 @@ public class NFA {
         {
             statesString = "null";
         }
+
         return statesString;
     }
 
@@ -357,7 +373,7 @@ public class NFA {
         System.out.println("tempNfa: " + tempNfa.toString());
 
 
-
+        nfa.removeDuplicateStatesAndTransitions();
         return nfa;
 
     }
@@ -373,18 +389,19 @@ public class NFA {
             }
         }
 
-        //remove duplicate transitions from transitionsToAdd
-        for(Transition transition : transitionsToAdd) {
-            // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
-            if(transitions.contains(transition)) continue;
-            else // Skip if transition already exists in new list
-            addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        //remove duplicate transitions from transitions
+        transitions.clear();
+        for(Transition transition : transitionsToAdd)
+        {
+            if(!transitions.contains(transition))
+            {
+                transitions.add(transition);
+            }
         }
 
-        transitions = transitionsToAdd;
+        removeDuplicateStatesAndTransitions();
 
         return this;
-
     }
 
     public NFA addTransitionsfromPrevNFA(NFA prevNFA) {
@@ -392,6 +409,7 @@ public class NFA {
         // this.addTransition(startState, exitingState, null);
 
         //ADD states from prevNFA to this NFA
+        this.setStartState(prevNFA.getStartState());
         for(State state : prevNFA.states) {
             this.addState(state);
         }
@@ -417,10 +435,86 @@ public class NFA {
 
         transitions = transitionsToAdd;
 
+        removeDuplicateStatesAndTransitions();
+
         return this;
 
         // return null;
     }
 
+    public NFA joinTwoNFAs(NFA first, NFA second) {
 
+        NFA nfa = new NFA();
+
+        //add all states from first nfa to nfa
+        for(State state : first.states) {
+            nfa.addState(state);
+        }
+
+        //add all states from second nfa to nfa that are not already in nfa
+        for(State state : second.states) {
+            if(!nfa.states.contains(state)) {
+                nfa.addState(state);
+            }
+        }
+        // (0|(1(01*0)*1))*
+
+        //add all transitions to nfa from first nfa
+        for(Transition transition : first.transitions) {
+            nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        }
+
+        //add all transitions to nfa from second nfa that are not already in nfa
+        for(Transition transition : second.transitions) {
+            if(!nfa.transitions.contains(transition)) {
+                nfa.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+            }
+        }
+
+        //add start state
+        nfa.setStartState(first.getStartState());
+
+        //add exiting state
+        nfa.setExitingState(second.getExitingState());
+        nfa.addTransition(first.getExitingState(), second.getStartState(), null);
+        nfa = nfa.removeDuplicateTransitions();
+
+        System.out.println("\033[92m NFA POPO : " + nfa + "\033[0m");
+
+        nfa.removeDuplicateStatesAndTransitions();
+
+        return nfa;
+        // (0|(1(01*0)*1))*
+    }
+
+    public void removeDuplicateStatesAndTransitions() {
+
+        // delete duplicate states
+        for(State state : this.states) {
+            if(Collections.frequency(this.states, state) > 1) {
+                System.out.println("\033[92m NFA with uplicates removed : " + state + "\033[0m");
+                this.states.remove(state);
+            }
+        }
+
+        // delete duplicate transitions
+        for(Transition transition : this.transitions) {
+            if(Collections.frequency(this.transitions, transition) > 1) {
+                this.transitions.remove(transition);
+            }
+        }
+
+        // delete duplicate transitions from states
+        for(State state : this.states) {
+            for(Transition transition : state.getTransitions()) {
+                if(Collections.frequency(state.getTransitions(), transition) > 1) {
+                    state.getTransitions().remove(transition);
+                }
+            }
+        }
+
+
+        // but there are still duplicate transitions
+
+    }
 }

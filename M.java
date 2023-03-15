@@ -153,7 +153,7 @@ public class M {
                             {
                                 if(cc == '*')
                                 {
-                                    System.out.println( "prev char is: " + c + "and next char is character is: *");
+                                    System.out.println( "prev chaar is: " + c + "and next char is character is: *");
 
 
                                     NFA tempNfa = new NFA();
@@ -339,7 +339,13 @@ public class M {
 
                                 tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
 
+                                tempNfa.addTransition(fromState2, fromState, null);
+
+                                System.out.println("Hyayass + prev nfa: " +  tempNfa );
+
                                 tempNfa = oneOrMoreNFA;
+                                System.out.println("Hyayass + prev nfa After stuuuf : " +  tempNfa );
+
                                 i++;
                                 stack.remove(stack.size()-1);
 
@@ -374,6 +380,8 @@ public class M {
                                 tempNfa = optionalNFA.alphanumericNFA(optionalNFA, prevNFA.getExitingState(), fromState, null);
 
                                 tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
+                                tempNfa.addTransition(fromState, fromState2, null);
+
 
                                 tempNfa = optionalNFA;
                                 i++;
@@ -603,7 +611,7 @@ public class M {
             
                 else if(stack.get(stack.size()-1) instanceof NFA) //prev is a NFA
                 {
-                    System.out.println("* with last thing NFA: " + stringToTest.charAt(i));
+                    System.out.println("* withh last thing NFA: " + stringToTest.charAt(i));
                     //concatenate
                     NFA prevNFA = (NFA) stack.get(stack.size()-1);
                     NFA tempNfa = new NFA();
@@ -704,11 +712,21 @@ public class M {
             stack.add(finalNFA);
     
         }
+
+        NFA returnNFA = new NFA();
+
+        //remove duplicate states and tkransitions
+        
+        returnNFA = (NFA) stack.get(0);
+        returnNFA.removeDuplicateStatesAndTransitions();
+
+        stack.clear();
+        stack.add(returnNFA);
       
 
         System.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
 
-        System.out.println("Stack to String:  " + stack + " " + stack.size());
+        System.out.println("Stack to String:  " + returnNFA + " " + stack.size());
         return;
 
   
@@ -764,54 +782,60 @@ public class M {
                 
             //if temp stack has a | as one of the elements
 
-            ArrayList<Object> stackToAlter = new ArrayList<Object>(tempStack);
-           
-            for(Object obj : tempStack)
-            {
-                if(obj instanceof Character)
+                ArrayList<Object> stackToAlter = new ArrayList<Object>(tempStack);
+            
+                for(Object obj : tempStack)
                 {
-                    char c = (char) obj;
-                    if(c == '|')
+                    if(obj instanceof Character)
                     {
-                        //union operator 
-                        NFA nfa = (NFA) tempStack.get(tempStack.indexOf(obj)-1); 
-                        NFA nfa2 = (NFA) tempStack.get(tempStack.indexOf(obj)+1);
+                        char c = (char) obj;
+                        if(c == '|')
+                        {
+                            //union operator 
+                            NFA nfa = (NFA) tempStack.get(tempStack.indexOf(obj)-1); 
+                            NFA nfa2 = (NFA) tempStack.get(tempStack.indexOf(obj)+1);
 
-                        State fromState = new State("q"+numOfState, "normal");
-                        numOfState++;
-                        State toState = new State("q"+numOfState, "normal");
-                        numOfState++;
+                            State fromState = new State("q"+numOfState, "normal");
+                            numOfState++;
+                            State toState = new State("q"+numOfState, "normal");
+                            numOfState++;
 
-                        System.out.println("\u001B[31m First NFA: ---------" + nfa + " \u001B[0m");
-                        System.out.println("\u001B[31m Second NFA: ---------" + nfa2 + " \u001B[0m");
+                            System.out.println("\u001B[31m First NFA: ---------" + nfa + " \u001B[0m");
+                            System.out.println("\u001B[31m Second NFA: ---------" + nfa2 + " \u001B[0m");
 
-                        NFA tempNFA = new NFA();
-                        tempNFA = tempNFA.unionNFA(fromState, toState , nfa, nfa2);
+                            NFA tempNFA = new NFA();
+                            tempNFA = tempNFA.unionNFA(fromState, toState , nfa, nfa2);
+                            
+                            //remove the two nfa and the | from the stack
+                            stackToAlter.remove(nfa);
+                            stackToAlter.remove(stackToAlter.indexOf(obj));
+                            stackToAlter.remove(nfa2);
 
-                        //remove the two nfa and the | from the stack
-                        stackToAlter.remove(nfa);
-                        stackToAlter.remove(stackToAlter.indexOf(obj));
-                        stackToAlter.remove(nfa2);
+                        
 
-                      
+                            System.out.println("Temp stack after removal of stuff: " + stackToAlter + " Sized: " + stackToAlter.size());
 
-                        System.out.println("Temp stack after removal of stuff: " + stackToAlter + " Sized: " + stackToAlter.size());
+                            stackToAlter.add(0, tempNFA);
 
-                        stackToAlter.add(0, tempNFA);
-
-                        // recursive call to resolveObjectsToNFA
-                        System.out.println("recursive call to resolveObjectsToNFA with tempStack: " + stackToAlter + " Sized: " + stackToAlter.size());
-                        tempNFA = resolveObjectsToNFA(stackToAlter);
-                        return tempNFA;
+                            // recursive call to nnresolveObjectsToNFA
+                            System.out.println("recursive call to resolveObjectsToNFA with tempStack: " + stackToAlter + " Sized: " + stackToAlter.size());
+                            tempNFA = resolveObjectsToNFA(stackToAlter);
+                            return tempNFA;
+                        }
                     }
                 }
-            }
         }
         else
         {
             //many nfas next to each other 
 
             //check if all elements of tempStack are nfas
+            System.out.println("All elements are nfas");
+
+            //color output in light blue
+            System.out.println("\033[94m Tempstack at the moment: " + tempStack +" sized: " + tempStack.size() +   " \033[0m");
+
+
 
             boolean allNFA = true;
 
@@ -825,6 +849,27 @@ public class M {
 
             if(allNFA == true)
             {
+                NFA first = (NFA) tempStack.get(0);
+                NFA second = (NFA) tempStack.get(1);
+                NFA newNFNfa = new NFA();
+
+                newNFNfa = newNFNfa.joinTwoNFAs(first, second);
+
+
+
+                tempStack.remove(0);
+                tempStack.remove(0);
+                tempStack.add(0, newNFNfa);
+
+                System.out.println("Temp stack after removal of stuff: " + tempStack + " Sized: " + tempStack.size());
+
+                // recursive call to resolveObjectsToNFA
+
+                System.out.println("recursive call to resolveObjectsToNFA with tempStack: " + tempStack + " Sized: " + tempStack.size());
+                newNFNfa = resolveObjectsToNFA(tempStack);
+
+                return (NFA) tempStack.get(0);
+
 
             }
 
@@ -832,11 +877,6 @@ public class M {
         }
     }
 
-
-       
-
-
-        
 
         return (NFA) tempStack.get(0);
     }
