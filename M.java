@@ -69,6 +69,11 @@ public class M {
     public static void collectSubstrings(String stringToTest )
     {        
         for(int i =0; i < stringToTest.length(); i++) {
+
+            // String color = "\u001B[32m"; //light green
+
+            //text in light green 
+            System.out.println( "\u001B[32m" +stringToTest.charAt(i) + " is at index: " + i + " and stack is: " + stack + "\u001B[0m");
             
             if(stringToTest.charAt(i) == '(' || stringToTest.charAt(i) == ')') {                
                 if(stringToTest.charAt(i) == '(')
@@ -297,19 +302,14 @@ public class M {
                                 numOfState++;
 
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i)+ "");
-
                                 asteriskNFA = tempNfa.asteriskNFA(fromState, tempNfa);
+                                tempNfa = tempNfa.alphanumericNFA(asteriskNFA, prevNFA.getExitingState(), fromState, null);
+                                tempNfa =   tempNfa.AddTwoNFAs(tempNfa, prevNFA);
 
-                                tempNfa = asteriskNFA.alphanumericNFA(asteriskNFA, prevNFA.getExitingState(), fromState, null);
-
-                                tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
-
-                                tempNfa = asteriskNFA;
-                                i++;
+                                i++; 
                                 stack.remove(stack.size()-1);
 
                                 stack.add(tempNfa);
-
                             }
                             else if(nextChar == '+')
                             {
@@ -334,17 +334,9 @@ public class M {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 oneOrMoreNFA = tempNfa.oneOrMore_PlusNFA(fromState,fromState2, tempNfa);
 
-                                // oneOrMoreNFA.addTransition(prevNFA.getExitingState(), fromState, null);
-                                tempNfa = oneOrMoreNFA.alphanumericNFA(oneOrMoreNFA, prevNFA.getExitingState(), fromState, null);
+                                tempNfa = tempNfa.alphanumericNFA(oneOrMoreNFA, prevNFA.getExitingState(), fromState2, null);
 
-                                tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
-
-                                tempNfa.addTransition(fromState2, fromState, null);
-
-                                System.out.println("Hyayass + prev nfa: " +  tempNfa );
-
-                                tempNfa = oneOrMoreNFA;
-                                System.out.println("Hyayass + prev nfa After stuuuf : " +  tempNfa );
+                                tempNfa = tempNfa.AddTwoNFAs(tempNfa, prevNFA);
 
                                 i++;
                                 stack.remove(stack.size()-1);
@@ -375,15 +367,10 @@ public class M {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 optionalNFA = tempNfa.optionalNFA(fromState,fromState2, tempNfa);
 
-                                // optionalNFA.addTransition(fromState, prevNFA.getExitingState(), null);
+                                tempNfa = tempNfa.alphanumericNFA(optionalNFA, prevNFA.getExitingState(), fromState2, null);
 
-                                tempNfa = optionalNFA.alphanumericNFA(optionalNFA, prevNFA.getExitingState(), fromState, null);
+                                tempNfa = tempNfa.AddTwoNFAs(tempNfa, prevNFA);
 
-                                tempNfa = tempNfa.addTransitionsfromPrevNFA(prevNFA);
-                                tempNfa.addTransition(fromState, fromState2, null);
-
-
-                                tempNfa = optionalNFA;
                                 i++;
                                 stack.remove(stack.size()-1);
 
@@ -675,23 +662,85 @@ public class M {
                     NFA prevNFA = (NFA) stack.get(stack.size()-1);
                     NFA tempNfa = new NFA();
                     State fromState = new State("q"+numOfState, "normal");
-
                     numOfState++;
 
-                    tempNfa = tempNfa.asteriskNFA(fromState, prevNFA);
+                    State toState = new State("q"+ numOfState, "normal");
+                    numOfState++;
+
+                    // tempNfa = tempNfa.asteriskNFA(fromState, prevNFA);
+                    tempNfa = tempNfa.oneOrMore_PlusNFA(fromState, toState ,prevNFA);
                     // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
+
+                    tempNfa.addTransition(tempNfa.getExitingState() , fromState, null);
                     stack.remove(stack.size()-1);//remove previous item in stack 
 
-                    // stack.add(tempNfa);
-
                     stack.add(tempNfa);
-
                 }
 
             }
             else if(stringToTest.charAt(i) == '?')
             {
+                if(stack.get(stack.size()-1) instanceof Character) // prev ')'
+                {
+                    char c = (char) stack.get(stack.size()-1);
+                    int tempIndex = -1;
+                    ArrayList<Object> tempStack = new ArrayList<Object>();
+                    NFA tempNFA = new NFA();
 
+                   
+                    if(c == ')' )
+                    {
+                        //find nearest (
+                        for (int j = stack.size()-1; j >= 0; j--)
+                        {
+                            if(stack.get(j) instanceof Character)
+                            {
+                                char c2 = (char) stack.get(j);
+                                if(c2 == '(')
+                                {
+                                    //find nearest NFA
+                                    tempIndex = j;
+                                    break;
+                                }
+                            }
+                        }
+
+                        //create a subset of the stack from the nearest '(' to the nearest ')'
+                        for (int j = tempIndex; j < stack.size(); j++)
+                        {
+                            tempStack.add(stack.get(j));
+                        }
+                        System.out.println( "substring is:  " + tempStack);
+
+
+                        tempNFA = resolveObjectsToNFA(tempStack);
+                    }
+                }
+                else if(stack.get(stack.size()-1) instanceof NFA) //prev is a NFA
+                {
+                    System.out.println("* with last thingg NFA: " + stringToTest.charAt(i));
+                    //concatenate
+                    NFA prevNFA = (NFA) stack.get(stack.size()-1);
+                    NFA tempNfa = new NFA();
+                    State fromState = new State("q"+numOfState, "normal");
+                    numOfState++;
+
+                    State toState = new State("q"+ numOfState, "normal");
+                    numOfState++;
+
+                    //TODO: change all the other stuff
+
+                    // tempNfa = tempNfa.asteriskNFA(fromState, prevNFA);
+                    tempNfa = tempNfa.optionalNFA(fromState, toState ,prevNFA);
+                    // tempNfa = tempNfa.concatenation(prevNFA, toState, stringToTest.charAt(i)+ "");
+                    // tempNfa.addTransition( fromState, toState, null);
+
+                    System.out.println(" )))))) tmempNFA in this sunshine of ray : " + tempNfa);
+
+                    stack.remove(stack.size()-1);//remove previous item in stack 
+
+                    stack.add(tempNfa);
+                }
             }
             
         }
@@ -699,34 +748,26 @@ public class M {
         System.out.println("End of string reached");
         // All is done now resolve the stack to NFA
 
-        if (stack.size() > 1)
-        {
+      
             NFA finalNFA = resolveObjectsToNFA(stack);
 
             stack.clear();
     
-            finalNFA.removeDuplicateTransitions();
+            // finalNFA.removeDuplicateTransitions();
             System.out.println("Stack cleared " + finalNFA);
     
     
             stack.add(finalNFA);
     
-        }
-
-        NFA returnNFA = new NFA();
-
-        //remove duplicate states and tkransitions
-        
-        returnNFA = (NFA) stack.get(0);
-        returnNFA.removeDuplicateStatesAndTransitions();
-
-        stack.clear();
-        stack.add(returnNFA);
+       
       
 
         System.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
 
-        System.out.println("Stack to String:  " + returnNFA + " " + stack.size());
+        System.out.println("Stack to String:  " + stack.get(0) + " " + stack.size());
+        System.out.println("Start State : " + finalNFA.getStartState() );
+        System.out.println("Final State: " + finalNFA.getExitingState());
+
         return;
 
   
@@ -754,14 +795,16 @@ public class M {
         {
             if(tempStack.get(0) instanceof NFA)
             {
-                System.out.println("\u001B[30m Resolved to: ---------" + (NFA) tempStack.get(0) + " \u001B[0m");
+                System.out.println("\u001B[30m Resolved to: ---------\n" + (NFA) tempStack.get(0) + " \u001B[0m");
+                System.out.println("\u001B[31m Start state: ---------\n" + ((NFA) tempStack.get(0)).getStartState() + " \u001B[0m");
+                System.out.println("\u001B[31m Exit state: ---------\n" + ((NFA) tempStack.get(0)).getExitingState() + " \u001B[0m");
 
                 return (NFA) tempStack.get(0);
             }
         }
         else  //more than one nfa 
         {
-            //count number of 
+            //count number off 
 
             int count = 0;
 
@@ -805,8 +848,10 @@ public class M {
 
                             NFA tempNFA = new NFA();
                             tempNFA = tempNFA.unionNFA(fromState, toState , nfa, nfa2);
+                            tempNFA.addTransition(nfa.getExitingState(), toState, null);
+                            tempNFA.addTransition(nfa2.getExitingState(), toState, null);
                             
-                            //remove the two nfa and the | from the stack
+                            //remove the two nfa andnn the | from the sttack
                             stackToAlter.remove(nfa);
                             stackToAlter.remove(stackToAlter.indexOf(obj));
                             stackToAlter.remove(nfa2);
