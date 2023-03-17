@@ -41,6 +41,11 @@ public class M {
         NFA nfaObj = nfa.regex_to_NFA(stringToTest);
         nfaObj = nfaObj.reFormatNFA();
 
+        DFA dfa = new DFA(nfaObj);
+
+        dfa.e_closure(nfaObj.getStartState(), null);
+
+
         System.out.println("NFA is: " + nfaObj.toString());
     }
 

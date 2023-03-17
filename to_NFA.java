@@ -10,11 +10,6 @@ public class to_NFA {
     
     public NFA regex_to_NFA(String stringToTest) {
         for(int i =0; i < stringToTest.length(); i++) {
-
-            // String color = "\u001B[32m"; //light green
-
-            //text in light green 
-            System.out.println( "\u001B[32m" +stringToTest.charAt(i) + " is at index: " + i + " and stack is: " + stack + "\u001B[0m");
             
             if(stringToTest.charAt(i) == '(' || stringToTest.charAt(i) == ')') {                
                 if(stringToTest.charAt(i) == '(')
@@ -43,20 +38,16 @@ public class to_NFA {
                         }
                     }
 
-                    System.out.println( "tempIndex is:  " + tempIndex);
-
                     //create a subset of the stack from the nearest '(' to the nearest ')'
                     for (int j = tempIndex; j < stack.size(); j++)
                     {
                         tempStack.add(stack.get(j));
 
                     }
-                    System.out.println( "substring is:  " + tempStack);
 
                     tempNFA = resolveObjectsToNFA(tempStack);
 
                     //remove the subset from the stack
-                    System.out.println("temp index: " + tempIndex + " thats: " + stack.get(tempIndex) );
                     
                     ArrayList<Object> tempStack2 = new ArrayList<Object>();
 
@@ -67,9 +58,7 @@ public class to_NFA {
 
                     stack = tempStack2;
 
-                    System.out.println("After removing: " + stack + " size: " + stack.size());
                     stack.add(tempNFA);
-                    System.out.println("After Adding combined nfa: " + stack + " size: " + stack.size());
 
                 }
             }
@@ -82,7 +71,7 @@ public class to_NFA {
 
                 if(stack.size() > 0) //starts with (
                 {
-                    System.out.println(stringToTest.charAt(i) + " is a character");
+                    // //m.out.println(stringToTest.charAt(i) + " is a character");
 
                     if(stack.get(stack.size()-1) instanceof Character)
                     {
@@ -99,7 +88,7 @@ public class to_NFA {
                             {
                                 if(cc == '*')
                                 {
-                                    System.out.println( "prev chaar is: " + c + "and next char is character is: *");
+                                    //m.out.println( "prev chaar is: " + c + "and next char is character is: *");
 
 
                                     NFA tempNfa = new NFA();
@@ -125,7 +114,7 @@ public class to_NFA {
                                 }
                                 else if (cc == '+')
                                 {
-                                    System.out.println( "prev char is: " + c + "and next char is character is: +");
+                                    //m.out.println( "prev char is: " + c + "and next char is character is: +");
 
                                     NFA tempNfa = new NFA();
                                     NFA plusNFA = new NFA();
@@ -147,14 +136,14 @@ public class to_NFA {
 
                                     tempNfa = plusNFA;
                                     i++;
-                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                    //m.out.println("NFA after plus operator: " + tempNfa);
                                 
                                     stack.add(tempNfa);
 
                                 }
                                 else if (cc == '?')
                                 {
-                                    System.out.println( "prev char is: " + c + "and next char is character is: ?");
+                                    //m.out.println( "prev char is: " + c + "and next char is character is: ?");
 
                                     NFA tempNfa = new NFA();
                                     NFA optionalNFA = new NFA();
@@ -176,14 +165,14 @@ public class to_NFA {
 
                                     tempNfa = optionalNFA;
                                     i++;
-                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                    //m.out.println("NFA after plus operator: " + tempNfa);
                                 
                                     stack.add(tempNfa);
                                 }
                             }
                             else if(cc == '(' || cc == ')' || isAlphanumeric(cc) || cc == '|'  )
                             {
-                                System.out.println( "prev char is: " + c + "and next char is character is: (<), (|), (char), ()) ");
+                                //m.out.println( "prev char is: " + c + "and next char is character is: (<), (|), (char), ()) ");
 
                                 NFA tempNfa = new NFA();
 
@@ -200,7 +189,7 @@ public class to_NFA {
                         }
                         else // no next thing to check 
                         {
-                            System.out.println( "prev char is: " + c + "and no NEXT cgar");
+                            //m.out.println( "prev char is: " + c + "and no NEXT cgar");
 
                             NFA tempNfa = new NFA();
 
@@ -216,7 +205,7 @@ public class to_NFA {
                     }
                     else if(stack.get(stack.size()-1) instanceof NFA)
                     {
-                        System.out.println(c + " prev is an NFA ");
+                        //m.out.println(c + " prev is an NFA ");
 
                         char nextChar = ' ';
 
@@ -227,7 +216,7 @@ public class to_NFA {
                         {
                             if(nextChar == '*')
                             {   
-                                System.out.println( "prev char is an NFA "+ c + "and next char is character is: *");
+                                //m.out.println( "prev char is an NFA "+ c + "and next char is character is: *");
 
                                 NFA prevNFA = (NFA) stack.get(stack.size()-1);
                                 NFA tempNfa = new NFA();
@@ -244,21 +233,21 @@ public class to_NFA {
 
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i)+ "");
                                 asteriskNFA = tempNfa.asteriskNFA(fromState, tempNfa);
-                                System.out.println("***************** ");
+                                //m.out.println("***************** ");
                                 tempNfa = tempNfa.alphanumericNFA(asteriskNFA, prevNFA.getExitingState(), fromState, null);
-                                System.out.println("Start state: " + tempNfa.getStartState());
-                                System.out.println("Exiting state: " + tempNfa.getExitingState());
+                                //m.out.println("Start state: " + tempNfa.getStartState());
+                                //m.out.println("Exiting state: " + tempNfa.getExitingState());
 
-                                System.out.println("PrevNaf ss: " + prevNFA.getStartState());
-                                System.out.println("PrevNaf ee: " + prevNFA.getExitingState());
-                                System.out.println("***************** ");
+                                //m.out.println("PrevNaf ss: " + prevNFA.getStartState());
+                                //m.out.println("PrevNaf ee: " + prevNFA.getExitingState());
+                                //m.out.println("***************** ");
 
                                 // tempNfa.addTransition(prevNFA.getExitingState(), asteriskNFA.getStartState(), null);
                                 tempNfa =   tempNfa.AddTwoNFAs(tempNfa, prevNFA);
 
-                                System.out.println("NFA after Adding two nfas wo: " + tempNfa);
-                                System.out.println("tempNfa start state ss: " + tempNfa.getStartState());
-                                System.out.println("tempNfa exiting state ee: " + tempNfa.getExitingState());
+                                //m.out.println("NFA after Adding two nfas wo: " + tempNfa);
+                                //m.out.println("tempNfa start state ss: " + tempNfa.getStartState());
+                                //m.out.println("tempNfa exiting state ee: " + tempNfa.getExitingState());
                                 // 
                                 i++; 
                                 stack.remove(stack.size()-1);
@@ -267,7 +256,7 @@ public class to_NFA {
                             }
                             else if(nextChar == '+')
                             {
-                                System.out.println( "prev char is an NFA "+ c + "and next char is character is: +");
+                                //m.out.println( "prev char is an NFA "+ c + "and next char is character is: +");
 
                                 NFA prevNFA = (NFA) stack.get(stack.size()-1);
                                 NFA tempNfa = new NFA();
@@ -288,30 +277,30 @@ public class to_NFA {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 tempNfa = tempNfa.oneOrMore_PlusNFA(fromState,fromState2, tempNfa);
 
-                                System.out.println("TavaPano: " + tempNfa);
-                                System.out.println("SS tempnfsss : " + tempNfa.getStartState());
-                                System.out.println("EE tempss: " + tempNfa.getExitingState() );
+                                //m.out.println("TavaPano: " + tempNfa);
+                                //m.out.println("SS tempnfsss : " + tempNfa.getStartState());
+                                //m.out.println("EE tempss: " + tempNfa.getExitingState() );
 
-                                System.out.println(")))))))))))))))))))))))");
-                                System.out.println("Prev info: " + prevNFA);
-                                System.out.println("ss: " + prevNFA.getStartState());
-                                System.out.println("ee: " + prevNFA.getExitingState());
+                                //m.out.println(")))))))))))))))))))))))");
+                                //m.out.println("Prev info: " + prevNFA);
+                                //m.out.println("ss: " + prevNFA.getStartState());
+                                //m.out.println("ee: " + prevNFA.getExitingState());
 
                                 tempNfa.addTransition(prevNFA.getExitingState(), tempNfa.getStartState(), null);
                                 tempNfa.addState(fromState2);
                                 tempNfa.setExitingState(fromState2);
                                 tempNfa.setStartState(prevNFA.getStartState());
 
-                                System.out.println("TavaPannno: " + tempNfa);
-                                System.out.println("SS tempnfsss : " + tempNfa.getStartState());
-                                System.out.println("EE tempss: " + tempNfa.getExitingState() );
+                                //m.out.println("TavaPannno: " + tempNfa);
+                                //m.out.println("SS tempnfsss : " + tempNfa.getStartState());
+                                //m.out.println("EE tempss: " + tempNfa.getExitingState() );
                     
 
                                 tempNfa = tempNfa.AddTwoNFAsNotConcatenate(tempNfa, prevNFA);
 
-                                System.out.println("TavaPano after adding : " + tempNfa);
-                                System.out.println("SS tempnfsss : " + tempNfa.getStartState());
-                                System.out.println("EE tempss: " + tempNfa.getExitingState() );
+                                //m.out.println("TavaPano after adding : " + tempNfa);
+                                //m.out.println("SS tempnfsss : " + tempNfa.getStartState());
+                                //m.out.println("EE tempss: " + tempNfa.getExitingState() );
 
                                 i++;
                                 stack.remove(stack.size()-1);
@@ -321,7 +310,7 @@ public class to_NFA {
                             }
                             else if(nextChar == '?')
                             {
-                                System.out.println( "prev char is an NFA "+ c + "and next char is character is: ?");
+                                //m.out.println( "prev char is an NFA "+ c + "and next char is character is: ?");
 
                                 NFA prevNFA = (NFA) stack.get(stack.size()-1);
                                 NFA tempNfa = new NFA();
@@ -357,7 +346,7 @@ public class to_NFA {
                             }
                             else if(nextChar == '|' ||nextChar == '(' || nextChar == ')' || isAlphanumeric(nextChar))
                             {
-                                System.out.println( "prev char is an NFA " + c + " and next char is character is: or (_) alphanumeric " + nextChar);
+                                //m.out.println( "prev char is an NFA " + c + " and next char is character is: or (_) alphanumeric " + nextChar);
 
                                 NFA prevNFA = (NFA) stack.get(stack.size()-1);
                                 NFA tempNfa = new NFA();
@@ -373,7 +362,7 @@ public class to_NFA {
                         }
                         else
                         {
-                            System.out.println( "prev char is an NFA " + c + " and no next char");
+                            //m.out.println( "prev char is an NFA " + c + " and no next char");
 
                             NFA prevNFA = (NFA) stack.get(stack.size()-1);
                             NFA tempNfa = new NFA();
@@ -405,7 +394,7 @@ public class to_NFA {
                             {
                                 if(cc == '*')
                                 {
-                                    System.out.println( "prev char is: " + c + "and next char is character is: *");
+                                    //m.out.println( "prev char is: " + c + "and next char is character is: *");
 
 
                                     NFA tempNfa = new NFA();
@@ -434,7 +423,7 @@ public class to_NFA {
                                 }
                                 else if (cc == '+')
                                 {
-                                    System.out.println( "prev char is: " + c + "and next char is character is: +");
+                                    //m.out.println( "prev char is: " + c + "and next char is character is: +");
 
                                     NFA tempNfa = new NFA();
                                     NFA plusNFA = new NFA();
@@ -459,14 +448,14 @@ public class to_NFA {
 
                                     tempNfa = plusNFA;
                                     i++;
-                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                    //m.out.println("NFA after plus operator: " + tempNfa);
                                 
                                     stack.add(tempNfa);
 
                                 }
                                 else if (cc == '?')
                                 {
-                                    System.out.println( "prev char is: " + c + "and next char is character is: ?");
+                                    //m.out.println( "prev char is: " + c + "and next char is character is: ?");
 
                                     NFA tempNfa = new NFA();
                                     NFA optionalNFA = new NFA();
@@ -488,14 +477,14 @@ public class to_NFA {
 
                                     tempNfa = optionalNFA;
                                     i++;
-                                    System.out.println("NFA after plus operator: " + tempNfa);
+                                    //m.out.println("NFA after plus operator: " + tempNfa);
                                 
                                     stack.add(tempNfa);
                                 }
                             }
                             else if(cc == '(' || cc == ')' || isAlphanumeric(cc) || cc == '|'  )
                             {
-                                System.out.println( "prev char is: " + c + "and next char is character is: (<), (|), (char), ()) ");
+                                //m.out.println( "prev char is: " + c + "and next char is character is: (<), (|), (char), ()) ");
 
                                 NFA tempNfa = new NFA();
 
@@ -512,7 +501,7 @@ public class to_NFA {
                         }
                         else // no next thing to check 
                         {
-                            System.out.println( "prev char is: " + c + "and no NEXT cgar");
+                            //m.out.println( "prev char is: " + c + "and no NEXT cgar");
 
                             NFA tempNfa = new NFA();
 
@@ -532,12 +521,12 @@ public class to_NFA {
             else if(stringToTest.charAt(i) == '|') //prev can be ) ,NFA, *, +, ?
             {
                 stack.add(stringToTest.charAt(i));
-                System.out.println( "just added to stack");
+                //m.out.println( "just added to stack");
 
             }
             else if(stringToTest.charAt(i) == '*') // prev element in stack can be ) or nfa 
             {
-                System.out.println(stringToTest.charAt(i) + " is a *");
+                //m.out.println(stringToTest.charAt(i) + " is a *");
                 ArrayList<Object> tempStack = new ArrayList<Object>();
                 int tempIndex = 0;
                 NFA tempNFA = new NFA();
@@ -568,7 +557,7 @@ public class to_NFA {
                         {
                             tempStack.add(stack.get(j));
                         }
-                        System.out.println( "substring is:  " + tempStack);
+                        //m.out.println( "substring is:  " + tempStack);
 
 
                         tempNFA = resolveObjectsToNFA(tempStack);
@@ -577,7 +566,7 @@ public class to_NFA {
             
                 else if(stack.get(stack.size()-1) instanceof NFA) //prev is a NFA
                 {
-                    System.out.println("* withh last thing NFA: " + stringToTest.charAt(i));
+                    //m.out.println("* withh last thing NFA: " + stringToTest.charAt(i));
                     //concatenate
                     NFA prevNFA = (NFA) stack.get(stack.size()-1);
                     NFA tempNfa = new NFA();
@@ -628,7 +617,7 @@ public class to_NFA {
                         {
                             tempStack.add(stack.get(j));
                         }
-                        System.out.println( "substring is:  " + tempStack);
+                        //m.out.println( "substring is:  " + tempStack);
 
 
                         tempNFA = resolveObjectsToNFA(tempStack);
@@ -636,7 +625,7 @@ public class to_NFA {
                 }
                 else if(stack.get(stack.size()-1) instanceof NFA) //prev is a NFA
                 {
-                    System.out.println("* with lasttt thing NFA: " + stringToTest.charAt(i));
+                    //m.out.println("* with lasttt thing NFA: " + stringToTest.charAt(i));
                     //concatenate
                     NFA prevNFA = (NFA) stack.get(stack.size()-1);
                     NFA tempNfa = new NFA();
@@ -689,7 +678,7 @@ public class to_NFA {
                         {
                             tempStack.add(stack.get(j));
                         }
-                        System.out.println( "substring is:  " + tempStack);
+                        //m.out.println( "substring is:  " + tempStack);
 
 
                         tempNFA = resolveObjectsToNFA(tempStack);
@@ -697,7 +686,7 @@ public class to_NFA {
                 }
                 else if(stack.get(stack.size()-1) instanceof NFA) //prev is a NFA
                 {
-                    System.out.println("* with last thingg NFA: " + stringToTest.charAt(i));
+                    //m.out.println("* with last thingg NFA: " + stringToTest.charAt(i));
                     //concatenate
                     NFA prevNFA = (NFA) stack.get(stack.size()-1);
                     NFA tempNfa = new NFA();
@@ -726,7 +715,7 @@ public class to_NFA {
             
         }
 
-        System.out.println("End of string reached");
+        //m.out.println("End of string reached");
         // All is done now resolve the stack to NFA
 
       
@@ -735,7 +724,7 @@ public class to_NFA {
             stack.clear();
     
             // finalNFA.removeDuplicateTransitions();
-            System.out.println("Stack cleared " + finalNFA);
+            //m.out.println("Stack cleared " + finalNFA);
     
     
             stack.add(finalNFA);
@@ -743,11 +732,11 @@ public class to_NFA {
        
         nfa = finalNFA;
 
-        System.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
+        //m.out.println("=================Final Stack Stack size:" + stack.size() + " =======================");
 
-        System.out.println("Stack to String:  " + stack.get(0) + " " + stack.size());
-        System.out.println("Start State : " + finalNFA.getStartState() );
-        System.out.println("Final State: " + finalNFA.getExitingState());
+        //m.out.println("Stack to String:  " + stack.get(0) + " " + stack.size());
+        //m.out.println("Start State : " + finalNFA.getStartState() );
+        //m.out.println("Final State: " + finalNFA.getExitingState());
 
         return nfa; 
     }
@@ -755,7 +744,7 @@ public class to_NFA {
     public  NFA resolveObjectsToNFA(ArrayList<Object> tempStack) {
 
         //color output in orange
-        System.out.println("\u001B[33m Stack to resolve: ---------" + tempStack +" sized: " + tempStack.size() +   " \u001B[0m");
+        //m.out.println("\u001B[33m Stack to resolve: ---------" + tempStack +" sized: " + tempStack.size() +   " \u001B[0m");
 
         //remove firs element in stack
         if(tempStack.get(0) instanceof Character)
@@ -771,9 +760,9 @@ public class to_NFA {
         {
             if(tempStack.get(0) instanceof NFA)
             {
-                System.out.println("\u001B[30m Resolved to: ---------\n" + (NFA) tempStack.get(0) + " \u001B[0m");
-                System.out.println("\u001B[31m Start state: ---------\n" + ((NFA) tempStack.get(0)).getStartState() + " \u001B[0m");
-                System.out.println("\u001B[31m Exit state: ---------\n" + ((NFA) tempStack.get(0)).getExitingState() + " \u001B[0m");
+                //m.out.println("\u001B[30m Resolved to: ---------\n" + (NFA) tempStack.get(0) + " \u001B[0m");
+                //m.out.println("\u001B[31m Start state: ---------\n" + ((NFA) tempStack.get(0)).getStartState() + " \u001B[0m");
+                //m.out.println("\u001B[31m Exit state: ---------\n" + ((NFA) tempStack.get(0)).getExitingState() + " \u001B[0m");
 
                 return (NFA) tempStack.get(0);
             }
@@ -819,13 +808,13 @@ public class to_NFA {
                             State toState = new State("q"+numOfState, "normal");
                             numOfState++;
 
-                            System.out.println("\u001B[31m First NFA: ---------" + nfa + " \u001B[0m");
-                            System.out.println("Frst nfa ss: " + nfa.getStartState());
-                            System.out.println("Frst nfa es: " + nfa.getExitingState());
-                            System.out.println(" --------------------------------------------------");
-                            System.out.println("\u001B[31m Second NFA: ---------" + nfa2 + " \u001B[0m");
-                            System.out.println("Second nfa ss: " + nfa2.getStartState());
-                            System.out.println("Second nfa es: " + nfa2.getExitingState());
+                            //m.out.println("\u001B[31m First NFA: ---------" + nfa + " \u001B[0m");
+                            //m.out.println("Frst nfa ss: " + nfa.getStartState());
+                            //m.out.println("Frst nfa es: " + nfa.getExitingState());
+                            //m.out.println(" --------------------------------------------------");
+                            //m.out.println("\u001B[31m Second NFA: ---------" + nfa2 + " \u001B[0m");
+                            //m.out.println("Second nfa ss: " + nfa2.getStartState());
+                            //m.out.println("Second nfa es: " + nfa2.getExitingState());
 
                             NFA tempNFA = new NFA();
                             tempNFA = tempNFA.unionNFA(fromState, toState , nfa, nfa2);
@@ -839,12 +828,12 @@ public class to_NFA {
 
                         
 
-                            System.out.println("Temp stack after removal of stuff: " + stackToAlter + " Sized: " + stackToAlter.size());
+                            //m.out.println("Temp stack after removal of stuff: " + stackToAlter + " Sized: " + stackToAlter.size());
 
                             stackToAlter.add(0, tempNFA);
 
                             // recursive call to nnresolveObjectsToNFA
-                            System.out.println("recursive call to resolveObjectsToNFA with tempStack: " + stackToAlter + " Sized: " + stackToAlter.size());
+                            //m.out.println("recursive call to resolveObjectsToNFA with tempStack: " + stackToAlter + " Sized: " + stackToAlter.size());
                             tempNFA = resolveObjectsToNFA(stackToAlter);
                             return tempNFA;
                         }
@@ -856,10 +845,10 @@ public class to_NFA {
             //many nfas next to each other 
 
             //check if all elements of tempStack are nfas
-            System.out.println("All elements are nfas");
+            //m.out.println("All elements are nfas");
 
             //color output in light blue
-            System.out.println("\033[94m Tempstack at the moment: " + tempStack +" sized: " + tempStack.size() +   " \033[0m");
+            //m.out.println("\033[94m Tempstack at the moment: " + tempStack +" sized: " + tempStack.size() +   " \033[0m");
 
 
 
@@ -889,11 +878,11 @@ public class to_NFA {
                 tempStack.remove(0);
                 tempStack.add(0, newNFNfa);
 
-                System.out.println("Temp stack after removal of stuff: " + tempStack + " Sized: " + tempStack.size());
+                //m.out.println("Temp stack after removal of stuff: " + tempStack + " Sized: " + tempStack.size());
 
                 // recursive call to resolveObjectsToNFA
 
-                System.out.println("recursive call to resolveObjectsToNFA with tempStack: " + tempStack + " Sized: " + tempStack.size());
+                //m.out.println("recursive call to resolveObjectsToNFA with tempStack: " + tempStack + " Sized: " + tempStack.size());
                 newNFNfa = resolveObjectsToNFA(tempStack);
 
                 return (NFA) tempStack.get(0);
