@@ -47,15 +47,15 @@ public class NFA {
     public void addState(State state ) {
     // State state = new State(nodeLabel, nodeType, numberOfTransitions);
 
-        // if(!states.contains(state))
-        // {
+        if(!states.contains(state))
+        {
             states.add(state);
             stateCount++;
             if (state.getStateType().equals("final")) {
                 finalStateCount++;
                 finalStates.add(state);
             }
-        // }
+        }
 
     }
         
@@ -137,12 +137,6 @@ public class NFA {
 
     public NFA AddTwoNFAs( NFA two, NFA one) {
 
-        // NFA nfa = one;
-        // nfa.setStartState(one.getStartState());
-        // nfa.setExitingState(two.getExitingState());
-        // nfa.addTransition(one.getExitingState(), two.getStartState(), null);
-        // return nfa;
-
         NFA newNFA = new NFA();
 
         // add states from one nfa 
@@ -198,24 +192,8 @@ public class NFA {
 
         for(State state : secondOption.states)
         {
-
             nfa.addState(state);
         }
-
-        //add all transitions to nfa from substitute nfa
-        // ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
-        // for(State state : firstOption.states) {
-        //     for(Transition transition : state.getTransitions()) {
-        //         transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
-        //     }
-        // }
-
-        // for(State state : secondOption.states) {
-        //     for(Transition transition : state.getTransitions()) {
-        //         transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
-        //     }
-        // }
-        //remove duplicate transitions from transitions
 
         //ADD first Option transitions to nfa
         ArrayList<Transition> transitionsToAdd = new ArrayList<>(); // Create a new list to hold transitions to add to NFA
@@ -391,26 +369,6 @@ public class NFA {
         return nfa;
     }
 
-    @Override
-    public String toString() {
-
-        String statesString  = "";
-
-        //print all states
-        // for(State state : states) {
-        //     System.out.println("\u001B[34m " + state+ "\u001B[0m");
-        // }
-
-        //q0(a)-q1(b)-q2(c)-q3
-        // if(transitions.size() > 0)
-        // {
-            for(Transition transition : transitions) {
-                statesString += transition + "\n ";
-            }   
-
-        return statesString;
-    }
-
     public NFA joinAllStates( NFA tempNfa) {
 
         NFA nfa = new NFA();
@@ -455,8 +413,6 @@ public class NFA {
 
     public NFA addTransitionsfromPrevNFA(NFA prevNFA) {
 
-        // this.addTransition(startState, exitingState, null);
-
         //ADD states from prevNFA to this NFA
         this.setStartState(prevNFA.getStartState());
         for(State state : prevNFA.states) {
@@ -473,16 +429,6 @@ public class NFA {
                 transitionsToAdd.add(transition); // Add transition to the new list instead of modifying NFA transitions
             }
         }
-
-        //remove duplicate transitions from transitionsToAdd
-
-        // transitions.clear();    
-        // for(Transition transition : transitionsToAdd) {
-        //     // System.out.println("\u001B[34m " + transition+ "\u001B[0m");
-        //     if(transitions.contains(transition)) continue;
-        //     else // Skip if transition already exists in new list
-        //     addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
-        // }
 
         this.addTransition(prevNFA.getExitingState(), this.getStartState(), null);
 
@@ -543,15 +489,6 @@ public class NFA {
 
     public NFA removeDuplicateStatesAndTransitions() {
 
-    //    // delete duplicate states
-    //     Iterator<State> stateIter = this.states.iterator();
-    //     while(stateIter.hasNext()) {
-    //         State state = stateIter.next();
-    //         if(Collections.frequency(this.states, state) > 1) {
-    //             stateIter.remove();
-    //         }
-    //     }
-
         // delete duplicate transitions
         Iterator<Transition> transitionIter = this.transitions.iterator();
         while(transitionIter.hasNext()) {
@@ -591,5 +528,114 @@ public class NFA {
         
 
 
+    }
+
+    public NFA AddTwoNFAsNotConcatenate(NFA two, NFA one) {
+        NFA newNFA = new NFA();
+
+        // add states from one nfa 
+
+        for(State state : one.states)
+        {
+            newNFA.addState(state);
+        }
+
+        // add states from two nfa
+
+        for(State state : two.states)
+        {
+            newNFA.addState(state);
+        }
+
+        //add all transitions to nfa from substitute nfa
+     
+        for(Transition transition : one.transitions)
+        {
+            newNFA.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        }
+
+        for(Transition transition : two.transitions)
+        {
+            newNFA.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+        }
+
+        newNFA.setStartState(one.getStartState());
+        newNFA.setExitingState(two.getExitingState());
+
+        return newNFA;
+        
+    }
+
+    public NFA reFormatNFA() {
+
+        NFA newNFA = new NFA();
+
+        //add transitions as I traverse the transitions from start state
+
+        for(Transition transition: transitions )
+        {
+            newNFA.addState(transition.getTransitionFrom());
+            newNFA.addState(transition.getTransitionTo());
+        }
+
+        //for each state in newNFA add transitions to it from transitions is transition.from == state
+
+        for(State state : newNFA.states)
+        {
+            for(Transition transition : transitions)
+            {
+                if(transition.getTransitionFrom() == state)
+                {
+                    if( state.isTransitionPresent(transition, transitions) )
+                    {
+                        continue;
+                    }
+                    state.addTransition(transition);
+                }
+            }
+        }
+
+        newNFA.setStartState(startState);
+        newNFA.setExitingState(exitingState);
+
+        //add transitions to newNFA from state transitions 
+        for(State state : newNFA.states)
+        {
+            for(Transition transition : state.getTransitions())
+            {
+                newNFA.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+            }
+        }
+
+
+        //add exiting state
+
+        return newNFA;
+
+
+
+    }
+
+    @Override
+    public String toString() {
+
+        String statesString  = "";
+
+        //print all states
+        for(State state : states) {
+            // System.out.println("\u001B[34m " + state+ "\u001B[0m \n");
+            statesString += state + "\n ";
+        }
+
+        System.out.println("--------------------------------");
+        for(Transition transition : transitions) {
+            statesString += transition + "\n ";
+        }   
+
+        System.out.println("Start State : " + startState);
+        System.out.println("Exiting State : " + exitingState);
+        System.out.println("====================================");
+
+        return statesString;
     }
 }

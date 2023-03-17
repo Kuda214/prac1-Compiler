@@ -1,0 +1,7 @@
+1. (0|(1(01*0)*1))*  ---- WORKS
+2. ab*|(A?B*)+   --- WORKS
+3. ab*|(A?B*)*  ---- WORKS
+4. a|b*|(tv*)?  ------ WORKS
+5. ab*|(a?b*)?|(aba*)* ---- WORKS
+6. (aV*)+ --- WORKS
+7. (a|b)*c*b+   -- WORKS
