@@ -334,7 +334,11 @@ public class M {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 oneOrMoreNFA = tempNfa.oneOrMore_PlusNFA(fromState,fromState2, tempNfa);
 
-                                tempNfa = tempNfa.alphanumericNFA(oneOrMoreNFA, prevNFA.getExitingState(), fromState2, null);
+                                tempNfa.addTransition(prevNFA.getExitingState(), oneOrMoreNFA.getStartState(), null);
+                                tempNfa.addState(fromState2);
+                                tempNfa.setExitingState(fromState2);
+                                tempNfa.setStartState(prevNFA.getStartState());
+                    
 
                                 tempNfa = tempNfa.AddTwoNFAs(tempNfa, prevNFA);
 
@@ -367,9 +371,13 @@ public class M {
                                 tempNfa = tempNfa.alphanumericNFA(null, from, to, stringToTest.charAt(i) + "");
                                 optionalNFA = tempNfa.optionalNFA(fromState,fromState2, tempNfa);
 
-                                tempNfa = tempNfa.alphanumericNFA(optionalNFA, prevNFA.getExitingState(), fromState2, null);
+                                tempNfa.addTransition(prevNFA.getExitingState(), optionalNFA.getStartState(), null);
+                                tempNfa.addState(fromState2);
+                                tempNfa.setExitingState(fromState2);
+                                tempNfa.setStartState(prevNFA.getStartState());
 
                                 tempNfa = tempNfa.AddTwoNFAs(tempNfa, prevNFA);
+                                tempNfa.setStartState(prevNFA.getStartState());
 
                                 i++;
                                 stack.remove(stack.size()-1);

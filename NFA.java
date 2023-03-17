@@ -174,6 +174,8 @@ public class NFA {
         newNFA.setStartState(one.getStartState());
         newNFA.setExitingState(two.getExitingState());
 
+        newNFA.addTransition(one.getExitingState(), two.getStartState(), null);
+
         return newNFA;
         
     }
