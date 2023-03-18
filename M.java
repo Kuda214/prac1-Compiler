@@ -43,10 +43,12 @@ public class M {
 
         DFA dfa = new DFA(nfaObj);
 
-        dfa.e_closure(nfaObj.getStartState(), null);
-
-
         System.out.println("NFA is: " + nfaObj.toString());
+
+        dfa.to_DFA(nfaObj );
+
+
+
     }
 
     public static boolean ifPureRegex(String stringToTest) {

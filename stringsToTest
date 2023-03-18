@@ -5,3 +5,8 @@
 5. ab*|(a?b*)?|(aba*)* ---- WORKS
 6. (aV*)+ --- WORKS
 7. (a|b)*c*b+   -- WORKS
+
+
+dfa:
+
+1. (a|b*)ac

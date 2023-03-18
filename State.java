@@ -23,6 +23,11 @@ public class State {
         return stateType;
     }
 
+    public void setStateType(String s)
+    {
+        this.stateType = s;
+    }
+
     public ArrayList<Transition> getTransitions() {
         return transitions;
     }
