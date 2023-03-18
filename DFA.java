@@ -98,6 +98,19 @@ public class DFA {
                         {
                             state.setStateType("final");
                         }
+
+                        if(i == 0 )
+                        {
+                            newState.setStateType("start");
+                        }
+                        if(index == 0 )
+                        {
+                            state.setStateType("start");
+                        }
+
+                        
+
+                        
                         
                         tempDfa.addState(newState);
                         tempDfa.addState(state);
@@ -115,6 +128,15 @@ public class DFA {
                         if(moveResult.contains(finalState))
                         {
                             state.setStateType("final");
+                        }
+
+                        if(i == 0 )
+                        {
+                            newState.setStateType("start");
+                        }
+                        if((dfaStates.size()-1) == 0 )
+                        {
+                            state.setStateType("start");
                         }
                         
                         tempDfa.addState(newState);
@@ -304,10 +326,13 @@ public class DFA {
 
         System.out.println("--------------------------------");
 
-        //print all states
-        // for(State state : states) {
-        //     statesString += state + "\n ";
-        // }
+        // print all states
+        for(State state : states) {
+            if(state.getStateType() != "normal")
+            statesString += state.getStateLabel() +" - " + state.getStateType()+ "\n ";
+            else
+            statesString += state.getStateLabel() + "\n ";
+        }
 
         System.out.println("--------------------------------");
         for(Transition transition : transitions) {
