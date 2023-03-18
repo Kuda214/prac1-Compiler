@@ -22,6 +22,11 @@ public class DFA {
         this.charList = nfa.getAlphabetList();
     }
 
+    public ArrayList<String> getAlphabet()
+    {
+        return this.charList;
+    }
+
     public void addState(State state ) {
     
             if(!states.contains(state))
@@ -102,10 +107,18 @@ public class DFA {
                         if(i == 0 )
                         {
                             newState.setStateType("start");
+                            if(moveResult.contains(finalState))
+                            {
+                                newState.setStateType("start && final");
+                            }
                         }
                         if(index == 0 )
                         {
                             state.setStateType("start");
+                            if(moveResult.contains(finalState))
+                            {
+                                newState.setStateType("start && final");
+                            }
                         }
 
                         
@@ -128,15 +141,24 @@ public class DFA {
                         if(moveResult.contains(finalState))
                         {
                             state.setStateType("final");
+
                         }
 
                         if(i == 0 )
                         {
                             newState.setStateType("start");
+                            if(moveResult.contains(finalState))
+                            {
+                                newState.setStateType("start && final");
+                            }
                         }
                         if((dfaStates.size()-1) == 0 )
                         {
                             state.setStateType("start");
+                            if(moveResult.contains(finalState))
+                            {
+                                newState.setStateType("start && final");
+                            }
                         }
                         
                         tempDfa.addState(newState);
