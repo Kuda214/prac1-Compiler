@@ -44,11 +44,12 @@ public class State {
 
     public boolean addTransition(Transition transition) {
         if (transition != null) {
-            
+
             //check if transition that has the same state from and to already exist if not add else add
             if(isTransitionPresent(transition, transitions)) {
                 return false;
             }
+
 
             transitions.add(transition);
             numberOfTransitions++;
@@ -60,11 +61,31 @@ public class State {
 
     public boolean isTransitionPresent(Transition transition, Collection<Transition> transitions) {
         for (Transition t : transitions) {
+
+            String ss  = transition.getTransitionValue();
+            if(ss == null)
+            {
+                ss = "null";
+            }
+
+            String sss = t.getTransitionValue();
+
+            if(sss == null)
+            {
+                sss = "null";
+            }
+
             if (t.getTransitionFrom().equals(transition.getTransitionFrom()) &&
-                t.getTransitionTo().equals(transition.getTransitionTo())
-               ) {
+                t.getTransitionTo().equals(transition.getTransitionTo()) && sss.equals(ss))
+            {
                 return true;
             }
+
+            // if (t.getTransitionFrom().equals(transition.getTransitionFrom()) &&
+            //     t.getTransitionTo().equals(transition.getTransitionTo()) && t.getTransitionValue().equals(transition.getTransitionValue()))
+            // {
+            //     return true;
+            // }
         }
         return false;
     }

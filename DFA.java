@@ -8,8 +8,10 @@ public class DFA {
     public ArrayList<String> charList = new ArrayList<>();
     public ArrayList<State> states = new ArrayList<>();
     public ArrayList<State> finalStates = new ArrayList<>();
+    public ArrayList<State> nonFinalStates = new ArrayList<>();
     public ArrayList<Transition> transitions = new ArrayList<>();
     public ArrayList<ArrayList<State>> dfaStates = new ArrayList<>();
+    public State startState;
     public NFA nfa;
     public DFA dfa ;
     public ArrayList<String> newTransitions_string = new ArrayList<>();
@@ -22,8 +24,12 @@ public class DFA {
         this.charList = nfa.getAlphabetList();
     }
 
+    public DFA() {
+    }
+
     public ArrayList<String> getAlphabet()
     {
+        System.out.println("Alphabet: " + charList);
         return this.charList;
     }
 
@@ -41,6 +47,32 @@ public class DFA {
         transition.setTransitionFrom(from);
         transition.setTransitionTo(to);
 
+        boolean aplhabetAlreadyExists = false;
+
+        for (int i = 0; i < charList.size(); i++) {
+            if (charList.get(i).equals(transitionValue)) {
+                aplhabetAlreadyExists = true;
+            }
+        }
+
+
+        if(aplhabetAlreadyExists)
+        {
+            //do nothing
+        }
+        else
+        {
+            System.out.println("adding " + transitionValue + " to alphabet");
+            charList.add(transitionValue);
+        }
+        
+        //loop through charList and remove null
+        for (int i = 0; i < charList.size(); i++) {
+            if (charList.get(i) == null) {
+                charList.remove(i);
+            }
+        }
+
         //check if from does not have the same transition before adding
 
         if(!from.getTransitions().contains(transition))
@@ -48,6 +80,7 @@ public class DFA {
             from.addTransition(transition);
             
         }
+
 
         //check if transition does not exist before adding
         if(!transitions.contains(transition))
@@ -81,7 +114,7 @@ public class DFA {
             
                 for(State sss: moveResult)
                 {
-                    if(moveResult != null)
+                    if(moveResult != null && !moveResult.isEmpty())
                     System.out.print("moveResult state " + sss.getStateLabel() + " , on symbol + "+ charList.get(k) +" , ");
                     
                 }
@@ -107,17 +140,21 @@ public class DFA {
                         if(i == 0 )
                         {
                             newState.setStateType("start");
+                            startState = newState;
                             if(moveResult.contains(finalState))
                             {
                                 newState.setStateType("start && final");
+                                finalStates.add(newState);
                             }
                         }
                         if(index == 0 )
                         {
                             state.setStateType("start");
+                            startState = state;
                             if(moveResult.contains(finalState))
                             {
                                 newState.setStateType("start && final");
+                                finalStates.add(newState);
                             }
                         }
 
@@ -141,23 +178,28 @@ public class DFA {
                         if(moveResult.contains(finalState))
                         {
                             state.setStateType("final");
+                            finalStates.add(state);
 
                         }
 
                         if(i == 0 )
                         {
                             newState.setStateType("start");
+                            startState = newState;
                             if(moveResult.contains(finalState))
                             {
                                 newState.setStateType("start && final");
+                                finalStates.add(newState);
                             }
                         }
                         if((dfaStates.size()-1) == 0 )
                         {
                             state.setStateType("start");
+                            startState = state;
                             if(moveResult.contains(finalState))
                             {
                                 newState.setStateType("start && final");
+                                finalStates.add(newState);
                             }
                         }
                         
@@ -181,11 +223,12 @@ public class DFA {
         System.out.println();
         System.out.println("Done " );
 
+        tempDfa = tempDfa.reFormatNFA();
 
-        System.out.println("New Transitions: " + tempDfa);
+        System.out.println("DFA: " + tempDfa);
 
 
-        return null;
+        return tempDfa;
     }
 
     private ArrayList<State> move(ArrayList<State> arrayList, String string) {
@@ -346,7 +389,7 @@ public class DFA {
 
         String statesString  = "";
 
-        System.out.println("--------------------------------");
+        statesString += "--------------------------------\n";
 
         // print all states
         for(State state : states) {
@@ -356,67 +399,123 @@ public class DFA {
             statesString += state.getStateLabel() + "\n ";
         }
 
-        System.out.println("--------------------------------");
+    
+
+        statesString += "--------------------------------";
         for(Transition transition : transitions) {
             statesString += transition + "\n ";
         }   
 
-        // System.out.println("Start State : " + dfa);
-        // System.out.println("Exiting State : " + exitingState);
-        System.out.println("====================================");
+        statesString += "====================================\n";
+        statesString += "Final States: \n";
+
+        statesString += finalStates + "\n";
+
+        statesString += "====================================\n";
+        statesString += "Non accepting States: \n";
+        // print non accepting states by looping through all states and checking if they are not in the final states list
+        statesString += nonFinalStates + "\n";
+
 
         return statesString;
     }
 
-    // public NFA reFormatNFA() {
+    public DFA reFormatNFA() {
 
-    //     NFA newNFA = new NFA();
+        DFA newDFA = new DFA();
 
-    //     //add transitions as I traverse the transitions from start state
+        //add this states to the new DFA whilst removing duplicates
+        newDFA.states.clear();
+        for(State state: states)
+        {
+            if(!newDFA.states.contains(state))
+            {
+                newDFA.addState(state);
+            }
+        }
+     
+        //remove duplicate states
 
-    //     for(Transition transition: transitions )
-    //     {
-    //         newNFA.addState(transition.getTransitionFrom());
-    //         newNFA.addState(transition.getTransitionTo());
-    //     }
-
-    //     //for each state in newNFA add transitions to it from transitions is transition.from == state
-
-    //     for(State state : newNFA.states)
-    //     {
-    //         for(Transition transition : transitions)
-    //         {
-    //             if(transition.getTransitionFrom() == state)
-    //             {
-    //                 if( state.isTransitionPresent(transition, transitions) )
-    //                 {
-    //                     continue;
-    //                 }
-    //                 state.addTransition(transition);
-    //             }
-    //         }
-    //     }
-
-    //     newNFA.setStartState(startState);
-    //     newNFA.setExitingState(exitingState);
-
-    //     //add transitions to newNFA from state transitions 
-    //     for(State state : newNFA.states)
-    //     {
-    //         for(Transition transition : state.getTransitions())
-    //         {
-    //             newNFA.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
-    //         }
-    //     }
+        for (int i = 0; i < newDFA.states.size(); i++) {
+            for (int j = i + 1; j < newDFA.states.size(); j++) {
+                if (newDFA.states.get(i).getStateLabel().equals(newDFA.states.get(j).getStateLabel())) {
+                    newDFA.states.remove(j);
+                    j--;
+                }
+            }
+        }
 
 
-    //     //add exiting state
+        //print out the states 
+        ArrayList<State> temp = new ArrayList<>();
 
-    //     return newNFA;
+        for(State state: newDFA.states)
+        {
+            State s = new State(state.getStateLabel(), state.getStateType());
+            temp.add(s);
+
+        }
+
+        newDFA.states.clear();
+        newDFA.states.addAll(temp);
+
+        //add transitions to the new DFA
+        for(State state : newDFA.states)
+        {
+            for(Transition transition : transitions)
+            {
+
+                if(transition.getTransitionFrom().getStateLabel().equals(state.getStateLabel()))
+                {
+
+                    if( state.isTransitionPresent(transition, newDFA.transitions) )
+                    {
+                    }
+                    else
+                    {
+                        state.addTransition(transition);
+                    }
+                }
+            }
+        }
+
+        
+
+        for(State state : newDFA.states)
+        {
+            for(Transition transition : state.getTransitions())
+            {
+                newDFA.addTransition(transition.getTransitionFrom(), transition.getTransitionTo(), transition.getTransitionValue());
+            }
+        }
+
+        //set the start state
+        newDFA.setStartState(startState);
+        
+        for(State state: newDFA.states)
+        {
+            if((state.getStateType().equals("final")) || (state.getStateType().equals("start and final"))   )
+            {
+                newDFA.finalStates.add(state);
+            }
+        }
+
+        for(State state: newDFA.states)
+        {
+            if(!state.getStateType().equals("final") && !state.getStateType().equals("start and final"))
+            {
+                newDFA.nonFinalStates.add(state);
+            }
+        }
 
 
 
-    // }
+        return newDFA;
+    }
+
+    private void setStartState(State startState2) {
+        this.startState = startState2;
+    }
 
 
 

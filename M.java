@@ -43,9 +43,13 @@ public class M {
 
         DFA dfa = new DFA(nfaObj);
 
-        System.out.println("NFA is: " + nfaObj.toString());
+        // System.out.println("NFA is: " + nfaObj.toString());
 
-        dfa.to_DFA(nfaObj );
+        dfa = dfa.to_DFA(nfaObj );
+
+        minDFA minDFA = new minDFA(dfa);
+
+        minDFA = minDFA.minimizeDFA();
 
 
 
