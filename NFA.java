@@ -665,26 +665,28 @@ public class NFA {
 
         String statesString  = "";
 
-        System.out.println("--------------------------------");
-        System.out.println("Alphabet includes: ");
-        System.out.println(charList);
+        statesString += "--------------------------------";
+        statesString += "Alphabet includes: ";
+        statesString += charList;
         
 
-        System.out.println("--------------------------------");
+        statesString += "--------------------------------";
 
         //print all states
         for(State state : states) {
             statesString += state + "\n ";
         }
 
-        System.out.println("--------------------------------");
+        statesString += "--------------------------------";
         for(Transition transition : transitions) {
             statesString += transition + "\n ";
         }   
 
-        System.out.println("Start State : " + startState);
-        System.out.println("Exiting State : " + exitingState);
-        System.out.println("====================================");
+        statesString += "Start State : " + startState + "\n ";
+        statesString += "Exiting State : " + exitingState + "\n ";
+        
+      
+        statesString += "====================================";
 
         return statesString;
     }

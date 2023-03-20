@@ -104,21 +104,44 @@ public class DFA {
         e_closure_start_state = tempDfa.e_closure(nfa.getStartState(), null);
       
         dfaStates.add(e_closure_start_state);
+        // System.out.println("dfaStates: " + dfaStates);
+
+        printDfaStates(dfaStates);
+
+        System.out.println("dsssssssssssssssssssssssssssssssss");
 
         for(int i=0 ; i<dfaStates.size() ;i++)
+        // for(int i=0 ; i<2 ;i++)
+
         {
             for(int k=0; k<charList.size(); k++)
             {
 
                 moveResult = move(dfaStates.get(i), charList.get(k));
+                System.out.println("moveResult size: " + moveResult.size() + "MoveResult state: " );
+
+                     // remove duplicate state in moveResult
+                for(int j=0; j<moveResult.size(); j++)
+                {
+                    for(int l=0; l<moveResult.size(); l++)
+                    {
+                        if(moveResult.get(j).getStateLabel().equals(moveResult.get(l).getStateLabel()) && j!=l)
+                        {
+                            moveResult.remove(l);
+                        }
+                    }
+                }
             
                 for(State sss: moveResult)
                 {
                     if(moveResult != null && !moveResult.isEmpty())
-                    System.out.print("moveResult state " + sss.getStateLabel() + " , on symbol + "+ charList.get(k) +" , ");
-                    
+                    System.out.print( sss.getStateLabel() + " on symbol + "+ charList.get(k) +" , ");
                 }
                 System.out.println();
+                System.out.println();
+
+           
+                
 
                 if(moveResult != null && !moveResult.isEmpty())
                 {
@@ -157,11 +180,7 @@ public class DFA {
                                 finalStates.add(newState);
                             }
                         }
-
-                        
-
-                        
-                        
+     
                         tempDfa.addState(newState);
                         tempDfa.addState(state);
                         tempDfa.addTransition(newState, state, charList.get(k));
@@ -214,12 +233,7 @@ public class DFA {
         System.out.println("DFAStates after moves" );
 
 
-        // for(int j=0; j<dfaStates.size() ; j++)
-        // {
-        
-        //         System.out.println("dfaState " + dfaStates.get(j));
-            
-        // }
+       
         System.out.println();
         System.out.println("Done " );
 
@@ -231,8 +245,19 @@ public class DFA {
         return tempDfa;
     }
 
-    private ArrayList<State> move(ArrayList<State> arrayList, String string) {
+    private void printDfaStates(ArrayList<ArrayList<State>> dfaStates2) {
+        for(int y= 0; y< dfaStates.size(); y++)
+        {
+            System.out.println("dfaStates["+ y +"]" + " : " );
+            for(int u=0; u<dfaStates.get(y).size(); u++)
+            {
+                System.out.print(dfaStates.get(y).get(u).getStateLabel() + " , ");
+            }
+            System.out.println();
+        }
+    }
 
+    private ArrayList<State> move(ArrayList<State> arrayList, String string) {
 
 
         //get where one can go on input string

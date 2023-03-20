@@ -10,8 +10,7 @@ public class minDFA {
     private ArrayList<State> nonFinalStates = new ArrayList<State>();
     private DFA dfa;
     public ArrayList<ArrayList<State>> groups = new ArrayList<ArrayList<State>>();
-    public boolean hasntChanged2 = false;
-    public boolean hasntChanged = false;
+    public boolean hasChanged = true;
 
 
     public minDFA(DFA dfa) {
@@ -78,7 +77,6 @@ public class minDFA {
                 System.out.print( groups.get(i).get(t).getStateLabel() + " , ");
             }
             System.out.println();
-
         }
 
         recurisveGrouping();
@@ -88,114 +86,71 @@ public class minDFA {
 
     private void recurisveGrouping(){
 
-       //check if all states are in one group
+        //check if all states are in one group
+        ArrayList<ArrayList<State>> groupPrev = new ArrayList<>();
+        ArrayList<ArrayList<State>> groupCurrent = new ArrayList<>();
+        ArrayList<ArrayList<State>> tempGroup = new ArrayList<>();
+
+        groupPrev.addAll(groups);
+        groupCurrent.addAll(groups);
         
-        ArrayList<ArrayList<State>> group0 = new ArrayList<>();
-        ArrayList<ArrayList<State>> group1 = new ArrayList<>();
+        //loop through groups and call splitGroup
 
-        ArrayList<State> g0Prev = new ArrayList<>();
-        ArrayList<State> g1Prev = new ArrayList<>();
-
-        if(groups.get(0).size() < 2)
-        {
-            if(groups.get(0).size() == 1)
+        
+            for(int i=0; i<groups.size(); i++)
             {
-                hasntChanged = true;
-                group0.add(groups.get(0));
-            }        
-        }
-        else
-        {
+                if((groups.get(i).size() == 1) || (groups.get(i).size() == 0))
+                {
+                    tempGroup.add(groups.get(i));
+                    continue;
+                }
 
-            group0.add(splitGroup(groups.get(0)));
+                ArrayList<State> group = groups.get(i);
+                groupCurrent = splitGroup(group);
+
+                for(int j=0; j<groupCurrent.size(); j++)
+                {
+                    System.out.println("Group Current " + j + ": "  );
+                    for(int k=0; k<groupCurrent.get(j).size(); k++)
+                    {
+                        System.out.println(  groupCurrent.get(j).get(k).getStateLabel());
+                    }
+                    System.out.println();
             
-
-            System.out.print("Results are: " );
-
-            for(int e=0; e<group0.size(); e++)
-            {
-                for(int r=0; r<group0.get(e).size() ; r++)
-                {
-                    System.out.print( group0.get(e).get(r).getStateLabel() + " , ");
                 }
-                System.out.println();
-            }
-    
-            System.out.println("************************************************==");
-    
-            //TODO: add group0 to groups
-            do {
-                for(int i=0; i<group0.size(); i++)
-                {
-                    if(group0.get(i).size() <2)
-                    {
-                        hasntChanged = true;
-                    }
-                    else if(group0.get(i).size() > 1)
-                    {
-                        group0.add(splitGroup(group0.get(i)));
-                        hasntChanged = false;
-                    }
+
+                //check if group has change
+
+                    // groups.remove(i);
+                    //add new groups
+                    tempGroup.addAll(groupCurrent);
+                    groupPrev = groupCurrent;
                 
-                }
-            } while (hasntChanged == true);
-
-        }
-
-        // check if group1 should be resolved
-
-        if(groups.get(1).size() < 2)
-        {
-            if(groups.get(1).size() == 1)
-            {
-                hasntChanged2 = true;
-                group1.add(groups.get(0));
             }
 
-        }
-        else
-        {
-            group1.add(splitGroup(groups.get(1)));
-            
-            do {
-                for(int i=0; i<group1.size(); i++)
-                {
-                    if(group1.get(i).size() <2)
-                    {
-                        hasntChanged2 = true;
-                    }
-                    else if(group1.get(i).size() > 1)
-                    {
-                        group1.add(splitGroup(group1.get(i)));
-                        hasntChanged2 = false;
-                    }
-                
-                }
-            } while (hasntChanged2 == true);
+        
 
-        }
-
-        //add group0 to groups
-        groups.clear();
-        groups.addAll(group0);
-        groups.addAll(group1);
+            if(tempGroup.size() != groupPrev.size())
+            {
+                System.out.println("Groups have changed");
+                groups.clear();
+                groups.addAll(tempGroup);
+                printGroups(tempGroup);
+                // printGroups(groupPrev);
+                return;
+            }
+            else
+            {
+                printGroups(groups);
+            }
+              
+    
 
         //loop through groups and print them
-        System.out.println();
-        System.out.println();
-
-        for(ArrayList<State> gs: groups)
-        {
-            for(int r=0; r<gs.size() ; r++)
-            {
-                System.out.println("Groups: " + gs.get(r).getStateLabel());
-            }
-            System.out.println();
-        }
        
     }
 
-    private ArrayList<State> splitGroup(ArrayList<State> arrayList) {
+    private ArrayList<ArrayList<State>> splitGroup(ArrayList<State> arrayList) {
 
         ArrayList<ArrayList<State>> newGroups = new ArrayList<>();
 
@@ -272,7 +227,7 @@ public class minDFA {
                                 System.out.println("State1: " + state1.getStateLabel() + " - " + alphabet.get(u) + "->" + state2.getStateLabel() + " might be in the same group");
                                 sameGroup = true; 
                               
-                               continue;
+                                continue;
                             }
                             else if (state1Found == true && state2Found == true)
                             {
@@ -280,7 +235,6 @@ public class minDFA {
                                 if(state1TransitionTo == state2TransitionTo)
                                 {
                                     System.out.println("State1: " + state1.getStateLabel() + " - " + alphabet.get(u) + "->" + state2.getStateLabel() + " might be in the same true");
-
                                     sameGroup = true;
                                    
                                     continue;
@@ -306,17 +260,7 @@ public class minDFA {
                             }
                         }
 
-                        //compare tempGroup to groups
-                        // if(sameGroup == false)
-                        // {
-                        //     tempGroup.add(state1);
-                            
-                        // }
-                        // else{
-
-                        //     tempGroup.add(state1);
-                        //     tempGroup.add(state2);
-                        // }    
+                    
                         
                         if(sameGroup == true)
                         {
@@ -333,16 +277,80 @@ public class minDFA {
             //check if tempGroup is the same as arrayList
             if(tempGroup.equals(arrayList))
             {
-
+                newGroups.add(tempGroup);
             }
             else
             {
+                //remove TEMPGROUP from arrayList
+                for(int i=0; i<tempGroup.size(); i++)
+                {
+                    for(int j=0; j<arrayList.size(); j++)
+                    {
+                        if(tempGroup.get(i).getStateLabel().equals(arrayList.get(j).getStateLabel()))
+                        {
+                            arrayList.remove(j);
+                        }
+                    }
+                }
+
+                //add arrayList to newGroups
+                newGroups.add(arrayList);
+                //add tempGroup to newGroups
                 newGroups.add(tempGroup);
             }
 
         
-        return tempGroup;
 
+        //Remove duplicates states from newGroups
+        for(int i=0; i<newGroups.size(); i++)
+        {
+            for(int j=0; j<newGroups.get(i).size(); j++)
+            {
+                for(int k=0; k<newGroups.get(i).size(); k++)
+                {
+                    if(newGroups.get(i).get(j).getStateLabel().equals(newGroups.get(i).get(k).getStateLabel()) && j != k)
+                    {
+                        newGroups.get(i).remove(k);
+                    }
+                }
+            }
+        }
+        
+        // print newGroups
+
+        System.out.println("New Groups are: ");
+        
+        for(int r=0; r< newGroups.size() ; r++)
+        {
+            System.out.println("Group: " + r);
+            for(int q=0; q< newGroups.get(r).size(); q++)
+            {
+                System.out.print(newGroups.get(r).get(q).getStateLabel() + " , ");
+            }
+            System.out.println();
+        }
+
+        System.out.println("End of Split group function");
+
+        
+        return newGroups;
+
+    }
+
+    public void printGroups(ArrayList<ArrayList<State>> groups)
+    {
+        System.out.println();
+        System.out.println();
+
+        for(ArrayList<State> gs: groups)
+        {
+            System.out.println("Group: " + groups.indexOf(gs)  );
+            for(int r=0; r<gs.size() ; r++)
+            {
+                System.out.println(gs.get(r).getStateLabel() + " , ");
+            }
+            System.out.println();
+        }
     }
 
 }

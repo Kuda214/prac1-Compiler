@@ -11,3 +11,8 @@ dfa:
 
 1. (a|b*)ac
 2. aa*|b
+
+minDFA
+
+1. a|b*|c*|d*
+2.
