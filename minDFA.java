@@ -1,5 +1,6 @@
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class minDFA {
     
@@ -49,11 +50,12 @@ public class minDFA {
     
     }
 
-    public minDFA minimizeDFA() {
+    public DFA minimizeDFA() {
         //create a new minDFA
        
         ArrayList<State> acceptingStates = dfa.finalStates;
         ArrayList<State> nonAcceptingStates = dfa.nonFinalStates;
+        DFA minDFA = new DFA();
 
   
         //add accepting states to group 1
@@ -79,18 +81,19 @@ public class minDFA {
             System.out.println();
         }
 
-        recurisveGrouping();
+        minDFA = recurisveGrouping();
 
-        return null;
+        return minDFA;
     }
 
-    private void recurisveGrouping(){
+    private DFA recurisveGrouping(){
 
         //check if all states are in one group
         ArrayList<ArrayList<State>> groupPrev = new ArrayList<>();
         ArrayList<ArrayList<State>> groupCurrent = new ArrayList<>();
         ArrayList<ArrayList<State>> tempGroup = new ArrayList<>();
         boolean split = false;
+        DFA minDFA = new DFA();
 
         groupPrev.addAll(groups);
         groupCurrent.addAll(groups);
@@ -182,7 +185,9 @@ public class minDFA {
             System.out.println("Groups size: " + groups.size());
             printGroups(groups);
 
-            createMinDFA(groups);
+            // createMinDFA(groups);
+            minDFA = newCreateDFA(groups);
+            return minDFA;
             
               
     
@@ -191,10 +196,245 @@ public class minDFA {
        
     }
 
+    
+
+    private DFA newCreateDFA(ArrayList<ArrayList<State>> groups2) {
+        DFA minDFA = new DFA();
+
+        for(int i=0; i<groups2.size(); i++)
+        {
+            State state = new State("G"+ i , "normal");
+            minDFA.addState(state);
+        }
+
+        System.out.println("****************************************************");
+        System.out.println(minDFA);
+        //add transitions to minDFA
+
+        for(int e=0; e< groups2.size(); e++)
+        {
+            State from = groups2.get(e).get(0);
+            ArrayList<Transition> transitions = from.getTransitions();
+            ArrayList<State> statesTo = new ArrayList<>();
+
+            for (int d=0; d< transitions.size(); d++) {
+                
+                State to = transitions.get(d).getTransitionTo();
+                int index = 0;
+
+                //find index of to in groups
+                for(int i=0; i<groups2.size(); i++)
+                {
+                    boolean found = false;
+                    for(int j=0; j<groups2.get(i).size(); j++)
+                    { 
+                        if(groups2.get(i).get(j).getStateLabel().equals(to.getStateLabel()))
+                        {
+                            System.out.println("to: " + to.getStateLabel() + " is in group " + i);
+                            index = i;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found)
+                    {
+                        break;
+                    }
+
+                }
+
+                //add transition to minDFA
+                Transition t = new Transition (transitions.get(d).getTransitionValue());
+                t.setTransitionTo(minDFA.states.get(index));
+                t.setTransitionFrom(minDFA.states.get(e));
+                minDFA.states.get(e).addTransition(t);
+
+                minDFA.addTransition(minDFA.states.get(e), minDFA.states.get(index), transitions.get(d).getTransitionValue());
+            }
+        }
+
+        //group index with Q0
+        for(int i=0; i<groups2.size(); i++)
+        {
+            for(int j=0; j<groups2.get(i).size(); j++)
+            {
+                if(groups2.get(i).get(j).getStateLabel().equals("Q0"))
+                {
+                    minDFA.setStartState(minDFA.states.get(i));
+                }
+            }
+        }
+
+        //Group index if it is final states
+        for(int i=0; i<groups2.size(); i++)
+        {
+            for(int j=0; j<groups2.get(i).size(); j++)
+            {
+                if(minDFA.states.get(i).getStateType().equals(minDFA.startState.getStateType()))
+                {
+                    if(finalStates.contains(groups2.get(i).get(j)))
+{                        minDFA.states.get(i).setStateType("start && final");
+                        minDFA.finalStates.add(minDFA.states.get(i));
+}                        
+                    else
+                    {
+                        minDFA.states.get(i).setStateType("start");
+                    }
+                }
+                else
+                if((groups2.get(i).get(j).getStateType() == "final"))
+                {
+                    minDFA.states.get(i).setStateType("final");
+                    minDFA.finalStates.add(minDFA.states.get(i));
+                }
+            
+            }
+        }
+
+        ArrayList<State> finalstates_nonDuplicate = minDFA.finalStates;
+
+        for(int i=0; i<finalstates_nonDuplicate.size(); i++)
+        {
+            for(int j=0; j<finalstates_nonDuplicate.size(); j++)
+            {
+                if(i != j)
+                {
+                    if(finalstates_nonDuplicate.get(i).getStateLabel().equals(finalstates_nonDuplicate.get(j).getStateLabel()))
+                    {
+                        finalstates_nonDuplicate.remove(j);
+                    }
+                }
+            }
+        }
+
+        minDFA.finalStates = finalstates_nonDuplicate;
+        
+
+        System.out.println("****************************************************");
+        System.out.println(minDFA);
+
+        return minDFA;
+
+    }
+
     private void createMinDFA(ArrayList<ArrayList<State>> groups2) {
 
-        //find the first state in the first group
+        DFA minDFA = new DFA();
 
+        //add states to minDFA
+        for(int i=0; i<groups2.size(); i++)
+        {
+            State state = new State(getCorrespondingAlphabet(i) , "normal");
+            minDFA.addState(state);
+        }
+
+        
+        //add transitions to minDFA
+        for(int e=0; e< groups2.size(); e++)
+        {
+            State from = groups2.get(e).get(0);
+            ArrayList<Transition> transitions = from.getTransitions();
+            ArrayList<State> statesTo = new ArrayList<>();
+
+
+            for (int d=0; d< transitions.size(); d++) {
+                
+                State to = transitions.get(d).getTransitionTo();
+                int index = 0;
+
+                //find index of to in groups
+                for(int i=0; i<groups2.size(); i++)
+                {
+                    if(groups2.get(i).contains(to))
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+                //get state name from index
+                String stateName = getCorrespondingAlphabet(index); //A
+                State destination = minDFA.getState(stateName);
+
+                Transition t = new Transition(transitions.get(d).getTransitionValue());
+                t.setTransitionTo(destination);
+                t.setTransitionFrom(from);
+
+                from.addTransition(t);
+                minDFA.addTransition(from, destination,transitions.get(d).getTransitionValue() );
+
+            }
+        }
+
+        //add accepting states to minDFA
+        for(int i=0; i<groups2.size(); i++)
+        {
+            for(int j=0; j<groups2.get(i).size(); j++)
+            {
+                if(finalStates.contains(groups2.get(i).get(j)))
+                {
+                    String stateName = getCorrespondingAlphabet(i);
+                    State state = minDFA.getState(stateName);
+                    if(state.getStateType().equals("start && final"))
+                    {
+                        state.setStateType("start && final");
+                    }
+                    else
+                    {
+                        state.setStateType("final");
+                    }
+            }
+        }
+
+        //find start state
+        for(int h=0; h<groups2.size(); h++)
+        {
+            for(int j=0; j<groups2.get(h).size(); j++)
+            {
+                if((groups2.get(h).get(j).getStateType().equals("start")) )
+                {
+                    String stateName = getCorrespondingAlphabet(i);
+                    State state = minDFA.getState(stateName);
+                    state.setStateType("start");
+                }
+                else  if(groups2.get(h).get(j).getStateType().equals("start && final")) 
+                {
+                    String stateName = getCorrespondingAlphabet(i);
+                    State state = minDFA.getState(stateName);
+                    state.setStateType("start && final");
+                }
+            }
+        }
+
+
+
+        }
+
+        //add states to minDFA finalstates and nonfinal states
+        for(int i=0; i<minDFA.states.size(); i++)
+        {
+            if(minDFA.states.get(i).getStateType().equals("final") || minDFA.states.get(i).getStateType().equals("start && final"))
+            {
+                finalStates.add(minDFA.states.get(i));
+            }
+            else
+            {
+                nonFinalStates.add(minDFA.states.get(i));
+            }
+        }
+
+        System.out.print(minDFA);
+
+
+    }
+
+    private String getCorrespondingAlphabet(int i) {
+    
+        //get corresponding alphabet based on index integer 
+        //A=0 , B=1, C=2, D=3, E=4, F=5, G=6, H=7, I=8, J=9, K=10, L=11, M=12, N=13, O=14, P=15, Q=16, R=17, S=18, T=19, U=20, V=21, W=22, X=23, Y=24, Z=25 , 
+        
+        String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        return alphabet.substring(i, i+1);
 
     }
 

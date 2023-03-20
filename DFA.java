@@ -538,8 +538,18 @@ public class DFA {
         return newDFA;
     }
 
-    private void setStartState(State startState2) {
+    void setStartState(State startState2) {
         this.startState = startState2;
+    }
+
+    public State getState(String stateName) {
+
+        for(State state : states) {
+            if(state.getStateLabel().equals(stateName)) {
+                return state;
+            }
+        }
+        return null;
     }
 
 
