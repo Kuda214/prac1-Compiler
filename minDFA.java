@@ -90,6 +90,7 @@ public class minDFA {
         ArrayList<ArrayList<State>> groupPrev = new ArrayList<>();
         ArrayList<ArrayList<State>> groupCurrent = new ArrayList<>();
         ArrayList<ArrayList<State>> tempGroup = new ArrayList<>();
+        boolean split = false;
 
         groupPrev.addAll(groups);
         groupCurrent.addAll(groups);
@@ -101,12 +102,23 @@ public class minDFA {
             {
                 if((groups.get(i).size() == 1) || (groups.get(i).size() == 0))
                 {
+                    if(!groups.get(i).isEmpty() && !tempGroup.contains(groups.get(i)))
                     tempGroup.add(groups.get(i));
                     continue;
                 }
 
                 ArrayList<State> group = groups.get(i);
                 groupCurrent = splitGroup(group);
+
+
+                // remove empty groups
+                for(int j=0; j<groupCurrent.size(); j++)
+                {
+                    if(groupCurrent.get(j).isEmpty())
+                    {
+                        groupCurrent.remove(j);
+                    }
+                }
 
                 for(int j=0; j<groupCurrent.size(); j++)
                 {
@@ -116,38 +128,74 @@ public class minDFA {
                         System.out.println(  groupCurrent.get(j).get(k).getStateLabel());
                     }
                     System.out.println();
-            
                 }
 
-                //check if group has change
+                tempGroup.addAll(groupCurrent);
+            
 
-                    // groups.remove(i);
-                    //add new groups
-                    tempGroup.addAll(groupCurrent);
-                    groupPrev = groupCurrent;
+                if(groupCurrent.size() > 1)
+                {
+                    System.out.println("Groups have changed");
+                    // groups.clear();
+                    //TODO: remove the group that was split
+                    
+                    groups.remove(i);
+
+                    //only add tempGroup if it is not already in groups
+                    
+                    groups.addAll(tempGroup);
+                    System.out.println("****************************************************");
+
+                    printGroups(groups);
+                    split = true;
+                }
+                  
                 
             }
 
-        
-
-            if(tempGroup.size() != groupPrev.size())
+            if(split)
             {
-                System.out.println("Groups have changed");
-                groups.clear();
-                groups.addAll(tempGroup);
-                printGroups(tempGroup);
-                // printGroups(groupPrev);
-                return;
+                recurisveGrouping();
             }
             else
             {
+                System.out.println("Groups have not changed");
                 printGroups(groups);
             }
+
+            // remove duplicate groups
+            for(int i=0; i<groups.size(); i++)
+            {
+                for(int j=0; j<groups.size(); j++)
+                {
+                    if(i != j)
+                    {
+                        if(groups.get(i).equals(groups.get(j)))
+                        {
+                            groups.remove(j);
+                        }
+                    }
+                }
+            }
+
+            System.out.println("****************************************************");
+            System.out.println("Groups size: " + groups.size());
+            printGroups(groups);
+
+            createMinDFA(groups);
+            
               
     
 
         //loop through groups and print them
        
+    }
+
+    private void createMinDFA(ArrayList<ArrayList<State>> groups2) {
+
+        //find the first state in the first group
+
+
     }
 
     private ArrayList<ArrayList<State>> splitGroup(ArrayList<State> arrayList) {
@@ -188,11 +236,15 @@ public class minDFA {
                         boolean state1Found = false;
                         boolean state2Found = false;
                         boolean sameGroup = false;
+                        ArrayList<Boolean> sameGroupList = new ArrayList<>();
                         //check if state1 and state2 are in the same group
                         for(int u=0; u<alphabet.size() ; u++)
                         {
+                            state1Found = false;
+                            state2Found = false;
+
                             System.out.println("Our alphabet is:  " + alphabet.get(u));
-                            System.out.println("Our State one: " + state1.getStateLabel());
+                             System.out.println("Our State one: " + state1.getStateLabel());
                             System.out.println("Our State two: " + state2.getStateLabel());
 
                             for(Transition t : state1.getTransitions())
@@ -215,18 +267,27 @@ public class minDFA {
                                 }
                             }
 
+                            System.out.println("State1Found: " + state1Found);
+                            System.out.println("State2Found: " + state2Found);
+                            System.out.println();
+
+
                         // if founds are not both true then add state1 to a new group
                             if((state1Found == false && state2Found == true) || (state1Found == true && state2Found == false) )
                             {
                                 System.out.println("State1: " + state1.getStateLabel() + " and State2: " + state2.getStateLabel() + " are not in the same group");
                                 sameGroup = false;
-                                continue;
+                                sameGroupList.add(sameGroup);
+                                sameGroup = false;
+                                
+                                break;
                             }
                             else if ((state1Found == false && state2Found == false) )
                             {
                                 System.out.println("State1: " + state1.getStateLabel() + " - " + alphabet.get(u) + "->" + state2.getStateLabel() + " might be in the same group");
                                 sameGroup = true; 
-                              
+                                sameGroupList.add(sameGroup);
+                                sameGroup = false;
                                 continue;
                             }
                             else if (state1Found == true && state2Found == true)
@@ -236,11 +297,14 @@ public class minDFA {
                                 {
                                     System.out.println("State1: " + state1.getStateLabel() + " - " + alphabet.get(u) + "->" + state2.getStateLabel() + " might be in the same true");
                                     sameGroup = true;
-                                   
+                                    sameGroupList.add(sameGroup);
+                                    sameGroup = false;
                                     continue;
+                                   
                                 }
                                 else
                                 {
+                                    boolean  state1TransitionToFound = false;
                                     //check if in the same group 
                                     for(int j=0; j<groups.size(); j++)
                                     {
@@ -252,17 +316,39 @@ public class minDFA {
                                                 System.out.println("yeeee s1: " + state1.getStateLabel() + " - " + alphabet.get(u) + "->" + state2.getStateLabel() + " might yeyow be e true");
 
                                                 sameGroup = true;
-                                                continue;
+                                                sameGroupList.add(sameGroup);
+                                                sameGroup = false;
+                                                state1TransitionToFound = true;
+                                                break;
+                                                
                                             }
                                         }
+                                        if(state1TransitionToFound == true)
+                                        {
+                                            break;
+                                        }
                                     }
+
+                                    if(state1TransitionToFound == false)
+                                    {
+                                        System.out.println("State1: " + state1.getStateLabel() + " - " + alphabet.get(u) + "->" + state2.getStateLabel() + " are not in the same group");
+                                        sameGroup = false;
+                                        sameGroupList.add(sameGroup);
+                                        sameGroup = false;
+                                        break;
+                                    }
+
+                                   
                                 }
                             }
                         }
 
+                        System.out.println("SameGroupList: " + sameGroupList);
+
                     
                         
-                        if(sameGroup == true)
+                        
+                        if(!sameGroupList.contains(false)) 
                         {
                             tempGroup.add(state1);
                             tempGroup.add(state2);
@@ -271,6 +357,7 @@ public class minDFA {
                         {
                             tempGroup.add(state1);
                         }
+                       
                 }
             }
 

@@ -15,4 +15,6 @@ dfa:
 minDFA
 
 1. a|b*|c*|d*
-2.
+2. aa*|b
+3. (a|b)*ab?c+
+
